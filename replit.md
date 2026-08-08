@@ -40,6 +40,7 @@ Semprot Zone adalah layanan streaming film dan serial milik sendiri dengan model
 ## User preferences
 
 - Target deployment yang direncanakan: Railway, dengan source code disimpan di GitHub.
+- Setiap perubahan kode yang selesai harus dipush ke repository GitHub.
 - Arah visual: gelap dan sinematik.
 - Nama produk: Semprot Zone.
 

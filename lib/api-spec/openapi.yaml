@@ -1,0 +1,215 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: catalog
+    description: Public streaming catalog
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /catalog:
+    get:
+      operationId: listCatalog
+      tags: [catalog]
+      summary: List catalog titles
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+        - in: query
+          name: genre
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [movie, series]
+      responses:
+        "200":
+          description: Catalog titles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Content"
+  /catalog/{contentId}:
+    get:
+      operationId: getContent
+      tags: [catalog]
+      summary: Get a title and its episodes
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Catalog title
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentDetail"
+        "404":
+          description: Content not found
+  /home:
+    get:
+      operationId: getHome
+      tags: [catalog]
+      summary: Get curated home page rails
+      responses:
+        "200":
+          description: Curated home page data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeFeed"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    Content:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [movie, series]
+        year:
+          type: number
+        duration:
+          type: string
+        maturity:
+          type: string
+        genres:
+          type: array
+          items:
+            type: string
+        posterUrl:
+          type: string
+        backdropUrl:
+          type: string
+        rating:
+          type: number
+        featured:
+          type: boolean
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+      required:
+        - id
+        - title
+        - tagline
+        - description
+        - type
+        - year
+        - duration
+        - maturity
+        - genres
+        - posterUrl
+        - backdropUrl
+        - rating
+        - featured
+        - progress
+    Episode:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        season:
+          type: number
+        episode:
+          type: number
+        duration:
+          type: string
+        thumbnailUrl:
+          type: string
+        videoUrl:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - season
+        - episode
+        - duration
+        - thumbnailUrl
+        - videoUrl
+    ContentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Content"
+        - type: object
+          properties:
+            episodes:
+              type: array
+              items:
+                $ref: "#/components/schemas/Episode"
+          required:
+            - episodes
+    HomeFeed:
+      type: object
+      properties:
+        featured:
+          $ref: "#/components/schemas/Content"
+        rails:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentRail"
+      required:
+        - featured
+        - rails
+    ContentRail:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Content"
+      required:
+        - id
+        - title
+        - items
+

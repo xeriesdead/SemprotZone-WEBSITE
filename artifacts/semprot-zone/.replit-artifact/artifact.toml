@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Semprot Zone"
+description = "Platform streaming film dan serial gratis dengan iklan untuk penonton umum, lengkap dengan katalog, pencarian, watchlist, dan pemutar video."
+version = "1.0.0"
+id = "artifacts/semprot-zone"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25637
+
+[services.development]
+run = "pnpm --filter @workspace/semprot-zone run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/semprot-zone", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/semprot-zone/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25637"
+BASE_PATH = "/"

@@ -12,6 +12,10 @@ tags:
     description: Health operations
   - name: catalog
     description: Public streaming catalog
+  - name: auth
+    description: Admin authentication
+  - name: admin
+    description: Admin CMS operations
 paths:
   /healthz:
     get:
@@ -86,6 +90,383 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HomeFeed"
+
+  # ------------------------------------------------------------------ auth
+  /auth/login:
+    post:
+      operationId: adminLogin
+      tags: [auth]
+      summary: Log in to the admin panel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+        "401":
+          description: Invalid credentials
+  /auth/logout:
+    post:
+      operationId: adminLogout
+      tags: [auth]
+      summary: Log out of the admin panel
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+  /auth/session:
+    get:
+      operationId: getSession
+      tags: [auth]
+      summary: Get current admin session status
+      responses:
+        "200":
+          description: Session status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+
+  # --------------------------------------------------------------- genres
+  /admin/genres:
+    get:
+      operationId: adminListGenres
+      tags: [admin]
+      summary: List genres
+      responses:
+        "200":
+          description: Genres
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Genre"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: adminCreateGenre
+      tags: [admin]
+      summary: Create a genre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenreInput"
+      responses:
+        "201":
+          description: Created genre
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Genre"
+        "401":
+          description: Unauthorized
+  /admin/genres/{genreId}:
+    delete:
+      operationId: adminDeleteGenre
+      tags: [admin]
+      summary: Delete a genre
+      parameters:
+        - in: path
+          name: genreId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+
+  # -------------------------------------------------------------- content
+  /admin/content:
+    get:
+      operationId: adminListContent
+      tags: [admin]
+      summary: List all content for the CMS
+      responses:
+        "200":
+          description: Content list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminContent"
+        "401":
+          description: Unauthorized
+    post:
+      operationId: adminCreateContent
+      tags: [admin]
+      summary: Create a movie or series
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentInput"
+      responses:
+        "201":
+          description: Created content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminContent"
+        "401":
+          description: Unauthorized
+  /admin/content/{contentId}:
+    get:
+      operationId: adminGetContent
+      tags: [admin]
+      summary: Get content with seasons, episodes and sources for editing
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Content detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminContentDetail"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    patch:
+      operationId: adminUpdateContent
+      tags: [admin]
+      summary: Update a movie or series
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentUpdate"
+      responses:
+        "200":
+          description: Updated content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminContent"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+    delete:
+      operationId: adminDeleteContent
+      tags: [admin]
+      summary: Delete content
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+
+  # -------------------------------------------------------------- seasons
+  /admin/content/{contentId}/seasons:
+    post:
+      operationId: adminCreateSeason
+      tags: [admin]
+      summary: Create a season for a series
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SeasonInput"
+      responses:
+        "201":
+          description: Created season
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Season"
+        "401":
+          description: Unauthorized
+  /admin/seasons/{seasonId}:
+    delete:
+      operationId: adminDeleteSeason
+      tags: [admin]
+      summary: Delete a season
+      parameters:
+        - in: path
+          name: seasonId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+
+  # ------------------------------------------------------------- episodes
+  /admin/content/{contentId}/episodes:
+    post:
+      operationId: adminCreateEpisode
+      tags: [admin]
+      summary: Create an episode
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EpisodeInput"
+      responses:
+        "201":
+          description: Created episode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminEpisode"
+        "401":
+          description: Unauthorized
+  /admin/episodes/{episodeId}:
+    patch:
+      operationId: adminUpdateEpisode
+      tags: [admin]
+      summary: Update an episode
+      parameters:
+        - in: path
+          name: episodeId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EpisodeUpdate"
+      responses:
+        "200":
+          description: Updated episode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminEpisode"
+        "401":
+          description: Unauthorized
+    delete:
+      operationId: adminDeleteEpisode
+      tags: [admin]
+      summary: Delete an episode
+      parameters:
+        - in: path
+          name: episodeId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+
+  # -------------------------------------------------------- video sources
+  /admin/sources:
+    post:
+      operationId: adminCreateSource
+      tags: [admin]
+      summary: Create a video source for a movie or episode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoSourceInput"
+      responses:
+        "201":
+          description: Created source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoSource"
+        "401":
+          description: Unauthorized
+  /admin/sources/{sourceId}:
+    patch:
+      operationId: adminUpdateSource
+      tags: [admin]
+      summary: Update a video source
+      parameters:
+        - in: path
+          name: sourceId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoSourceUpdate"
+      responses:
+        "200":
+          description: Updated source
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoSource"
+        "401":
+          description: Unauthorized
+    delete:
+      operationId: adminDeleteSource
+      tags: [admin]
+      summary: Delete a video source
+      parameters:
+        - in: path
+          name: sourceId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+
 components:
   schemas:
     HealthStatus:
@@ -95,6 +476,35 @@ components:
           type: string
       required:
         - status
+
+    # ---------------------------------------------------------- public
+    VideoSourceRef:
+      type: object
+      description: Public playable streaming source
+      properties:
+        id:
+          type: integer
+        providerName:
+          type: string
+        providerType:
+          type: string
+        kind:
+          type: string
+          enum: [embed, direct]
+        url:
+          type: string
+        label:
+          type: string
+        quality:
+          type: string
+          nullable: true
+      required:
+        - id
+        - providerName
+        - providerType
+        - kind
+        - url
+        - label
     Content:
       type: object
       properties:
@@ -165,6 +575,10 @@ components:
           type: string
         videoUrl:
           type: string
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoSourceRef"
       required:
         - id
         - title
@@ -174,6 +588,7 @@ components:
         - duration
         - thumbnailUrl
         - videoUrl
+        - sources
     ContentDetail:
       allOf:
         - $ref: "#/components/schemas/Content"
@@ -183,8 +598,13 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Episode"
+            sources:
+              type: array
+              items:
+                $ref: "#/components/schemas/VideoSourceRef"
           required:
             - episodes
+            - sources
     HomeFeed:
       type: object
       properties:
@@ -213,3 +633,395 @@ components:
         - title
         - items
 
+    # ------------------------------------------------------------ auth
+    LoginRequest:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+        - password
+    AuthStatus:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+      required:
+        - authenticated
+
+    # ---------------------------------------------------------- genres
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - slug
+        - name
+    GenreInput:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+      required:
+        - name
+
+    # -------------------------------------------------------- admin CMS
+    VideoSource:
+      type: object
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: string
+          nullable: true
+        episodeId:
+          type: integer
+          nullable: true
+        providerName:
+          type: string
+        providerType:
+          type: string
+        kind:
+          type: string
+          enum: [embed, direct]
+        url:
+          type: string
+        label:
+          type: string
+        quality:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+      required:
+        - id
+        - providerName
+        - providerType
+        - kind
+        - url
+        - label
+        - sortOrder
+        - isActive
+    VideoSourceInput:
+      type: object
+      properties:
+        contentId:
+          type: string
+          nullable: true
+        episodeId:
+          type: integer
+          nullable: true
+        providerName:
+          type: string
+        providerType:
+          type: string
+        kind:
+          type: string
+          enum: [embed, direct]
+        url:
+          type: string
+        label:
+          type: string
+        quality:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+      required:
+        - providerName
+        - providerType
+        - kind
+        - url
+    VideoSourceUpdate:
+      type: object
+      properties:
+        providerName:
+          type: string
+        providerType:
+          type: string
+        kind:
+          type: string
+          enum: [embed, direct]
+        url:
+          type: string
+        label:
+          type: string
+        quality:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+    AdminEpisode:
+      type: object
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: string
+        seasonId:
+          type: integer
+          nullable: true
+        seasonNumber:
+          type: integer
+        episodeNumber:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: string
+        thumbnailUrl:
+          type: string
+        sortOrder:
+          type: integer
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoSource"
+      required:
+        - id
+        - contentId
+        - seasonNumber
+        - episodeNumber
+        - title
+        - description
+        - duration
+        - thumbnailUrl
+        - sortOrder
+        - sources
+    Season:
+      type: object
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: string
+        number:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - id
+        - contentId
+        - number
+        - sortOrder
+    AdminContent:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [movie, series]
+        year:
+          type: integer
+        duration:
+          type: string
+        maturity:
+          type: string
+        posterUrl:
+          type: string
+        backdropUrl:
+          type: string
+        rating:
+          type: number
+        featured:
+          type: boolean
+        progress:
+          type: integer
+        sortOrder:
+          type: integer
+        genres:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - title
+        - tagline
+        - description
+        - type
+        - year
+        - duration
+        - maturity
+        - posterUrl
+        - backdropUrl
+        - rating
+        - featured
+        - progress
+        - sortOrder
+        - genres
+    AdminContentDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminContent"
+        - type: object
+          properties:
+            seasons:
+              type: array
+              items:
+                $ref: "#/components/schemas/Season"
+            episodes:
+              type: array
+              items:
+                $ref: "#/components/schemas/AdminEpisode"
+            sources:
+              type: array
+              items:
+                $ref: "#/components/schemas/VideoSource"
+          required:
+            - seasons
+            - episodes
+            - sources
+    ContentInput:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [movie, series]
+        year:
+          type: integer
+        duration:
+          type: string
+        maturity:
+          type: string
+        posterUrl:
+          type: string
+        backdropUrl:
+          type: string
+        rating:
+          type: number
+        featured:
+          type: boolean
+        progress:
+          type: integer
+        sortOrder:
+          type: integer
+        genres:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - type
+    ContentUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [movie, series]
+        year:
+          type: integer
+        duration:
+          type: string
+        maturity:
+          type: string
+        posterUrl:
+          type: string
+        backdropUrl:
+          type: string
+        rating:
+          type: number
+        featured:
+          type: boolean
+        progress:
+          type: integer
+        sortOrder:
+          type: integer
+        genres:
+          type: array
+          items:
+            type: string
+    SeasonInput:
+      type: object
+      properties:
+        number:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - number
+    EpisodeInput:
+      type: object
+      properties:
+        seasonId:
+          type: integer
+          nullable: true
+        seasonNumber:
+          type: integer
+        episodeNumber:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: string
+        thumbnailUrl:
+          type: string
+        sortOrder:
+          type: integer
+      required:
+        - seasonNumber
+        - episodeNumber
+        - title
+    EpisodeUpdate:
+      type: object
+      properties:
+        seasonId:
+          type: integer
+          nullable: true
+        seasonNumber:
+          type: integer
+        episodeNumber:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        duration:
+          type: string
+        thumbnailUrl:
+          type: string
+        sortOrder:
+          type: integer

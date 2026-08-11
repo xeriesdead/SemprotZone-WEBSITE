@@ -36,6 +36,7 @@ import {
 } from '@workspace/api-client-react';
 import type { Content, ContentDetail, Episode, HomeFeed } from '@workspace/api-client-react';
 import NotFound from '@/pages/not-found';
+import Admin from '@/pages/admin';
 
 const queryClient = new QueryClient();
 
@@ -238,7 +239,7 @@ function Watch({ watchlist, toggle }: { watchlist: ReturnType<typeof useWatchlis
 
 function AppRouter() {
   const watchlist = useWatchlist();
-  return <Switch><Route path="/" component={Home} /><Route path="/browse" component={Browse} /><Route path="/title/:id"><Detail watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route path="/watch/:id"><Watch watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route component={NotFound} /></Switch>;
+  return <Switch><Route path="/" component={Home} /><Route path="/browse" component={Browse} /><Route path="/admin" component={Admin} /><Route path="/title/:id"><Detail watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route path="/watch/:id"><Watch watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route component={NotFound} /></Switch>;
 }
 
 function App() {

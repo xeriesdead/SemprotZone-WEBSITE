@@ -7,8 +7,25 @@ import {
   genresTable,
 } from "@workspace/db";
 import { z } from "zod";
+import {
+  clearSessionCookie,
+  handleAdminLogin,
+  isAdminAuthenticated,
+  requireAdmin,
+} from "../lib/admin-auth";
 
 const router: IRouter = Router();
+
+router.post("/admin/login", handleAdminLogin);
+
+router.get("/admin/session", (req, res) => {
+  res.json({ authenticated: isAdminAuthenticated(req) });
+});
+
+router.post("/admin/logout", (_req, res) => {
+  clearSessionCookie(res);
+  res.status(204).send();
+});
 
 const adminContentInputSchema = z.object({
   id: z.string().trim().min(1),
@@ -102,6 +119,8 @@ function contentValues(input: AdminContentInput) {
     videoUrl: input.videoUrl || null,
   };
 }
+
+router.use("/admin/catalog", requireAdmin);
 
 router.get("/admin/catalog", async (_req, res) => {
   try {

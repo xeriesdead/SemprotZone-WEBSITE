@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Film, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Film, LockKeyhole, LogOut, Pencil, Plus, Trash2, X } from "lucide-react";
 
 type AdminContent = {
   id: string;
@@ -80,9 +80,24 @@ async function requestCatalog(path = "/api/admin/catalog", options?: RequestInit
   });
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(body?.error || "Request failed");
+    const error = new Error(body?.error || "Request failed") as Error & {
+      status?: number;
+    };
+    error.status = response.status;
+    throw error;
   }
   return response.status === 204 ? null : response.json();
+}
+
+async function checkAdminSession() {
+  const response = await fetch("/api/admin/session");
+  if (!response.ok) return false;
+  const body = (await response.json()) as { authenticated?: boolean };
+  return body.authenticated === true;
+}
+
+function isUnauthorized(error: unknown) {
+  return error instanceof Error && (error as Error & { status?: number }).status === 401;
 }
 
 function Field({
@@ -112,6 +127,11 @@ export default function Admin() {
   const [items, setItems] = useState<AdminContent[]>([]);
   const [form, setForm] = useState<ContentForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -122,6 +142,10 @@ export default function Admin() {
       setItems((await requestCatalog()) as AdminContent[]);
       setError("");
     } catch (loadError) {
+      if (isUnauthorized(loadError)) {
+        setAuthenticated(false);
+        return;
+      }
       setError(loadError instanceof Error ? loadError.message : "Unable to load catalog");
     } finally {
       setLoading(false);
@@ -129,8 +153,43 @@ export default function Admin() {
   }
 
   useEffect(() => {
-    void loadCatalog();
+    void checkAdminSession().then((isAuthenticated) => {
+      setAuthenticated(isAuthenticated);
+      if (isAuthenticated) void loadCatalog();
+      else setLoading(false);
+    });
   }, []);
+
+  async function login(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoggingIn(true);
+    setLoginError("");
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error || "Login gagal");
+      }
+      setPassword("");
+      setAuthenticated(true);
+      await loadCatalog();
+    } catch (loginFailure) {
+      setLoginError(loginFailure instanceof Error ? loginFailure.message : "Login gagal");
+    } finally {
+      setLoggingIn(false);
+    }
+  }
+
+  async function logout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setAuthenticated(false);
+    setItems([]);
+    resetForm();
+  }
 
   function updateForm(key: keyof ContentForm, value: string | boolean) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -193,6 +252,31 @@ export default function Admin() {
     }
   }
 
+  if (authenticated === null) {
+    return <div className="cinema-grain flex min-h-[100dvh] items-center justify-center bg-[#10151d] text-sm text-stone-500">Memeriksa sesi admin...</div>;
+  }
+
+  if (!authenticated) {
+    return (
+      <div className="cinema-grain flex min-h-[100dvh] items-center justify-center bg-[#10151d] px-5 text-stone-100">
+        <main className="w-full max-w-md rounded-2xl border border-white/[.08] bg-white/[.025] p-7 shadow-[0_22px_58px_rgba(0,0,0,.28)] md:p-9">
+          <div className="mb-8 flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-300 text-[#11161d]"><LockKeyhole className="h-5 w-5" /></span>
+            <div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-amber-300/80">Semprot Zone</p><h1 className="mt-1 font-display text-3xl">Admin login</h1></div>
+          </div>
+          <p className="mb-7 text-sm leading-6 text-stone-400">Masuk untuk mengelola katalog film dan serial.</p>
+          {loginError && <div className="mb-5 rounded border border-[#e47b67]/40 bg-[#e47b67]/10 px-4 py-3 text-sm text-[#f1a18f]" role="alert">{loginError}</div>}
+          <form onSubmit={login} className="space-y-5">
+            <label className="block"><span className="mb-2 block font-mono-ui text-[10px] uppercase tracking-[.14em] text-stone-500">Username</span><input required autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} className={inputClass()} /></label>
+            <label className="block"><span className="mb-2 block font-mono-ui text-[10px] uppercase tracking-[.14em] text-stone-500">Password</span><input required type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className={inputClass()} /></label>
+            <button disabled={loggingIn} type="submit" className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-bold text-[#11161d] transition hover:bg-amber-200 disabled:cursor-wait disabled:opacity-60">{loggingIn ? "Memeriksa..." : "Masuk"}</button>
+          </form>
+          <Link href="/" className="mt-7 inline-flex items-center gap-2 text-xs font-semibold text-stone-500 transition hover:text-amber-200"><ArrowLeft className="h-4 w-4" /> Kembali ke website</Link>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="cinema-grain min-h-[100dvh] bg-[#10151d] text-stone-100">
       <header className="border-b border-white/[.08] bg-[#10151d]/95">
@@ -205,9 +289,10 @@ export default function Admin() {
               SEMPR<span className="text-amber-300">OT</span> ZONE
             </span>
           </Link>
-          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 transition hover:text-amber-200">
-            <ArrowLeft className="h-4 w-4" /> Kembali ke website
-          </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 transition hover:text-amber-200"><ArrowLeft className="h-4 w-4" /> Kembali ke website</Link>
+              <button type="button" onClick={() => void logout()} className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 transition hover:text-amber-200"><LogOut className="h-4 w-4" /> Keluar</button>
+            </div>
         </div>
       </header>
 

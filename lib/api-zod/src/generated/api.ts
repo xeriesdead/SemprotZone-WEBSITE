@@ -43,6 +43,7 @@ export const ListCatalogResponseItem = zod.object({
   "genres": zod.array(zod.string()),
   "posterUrl": zod.string(),
   "backdropUrl": zod.string(),
+  "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
   "featured": zod.boolean(),
   "progress": zod.number().min(listCatalogResponseProgressMin).max(listCatalogResponseProgressMax)
@@ -74,6 +75,7 @@ export const GetContentResponse = zod.object({
   "genres": zod.array(zod.string()),
   "posterUrl": zod.string(),
   "backdropUrl": zod.string(),
+  "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
   "featured": zod.boolean(),
   "progress": zod.number().min(getContentResponseOneProgressMin).max(getContentResponseOneProgressMax)
@@ -115,6 +117,7 @@ export const GetHomeResponse = zod.object({
   "genres": zod.array(zod.string()),
   "posterUrl": zod.string(),
   "backdropUrl": zod.string(),
+  "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
   "featured": zod.boolean(),
   "progress": zod.number().min(getHomeResponseFeaturedProgressMin).max(getHomeResponseFeaturedProgressMax)
@@ -134,6 +137,7 @@ export const GetHomeResponse = zod.object({
   "genres": zod.array(zod.string()),
   "posterUrl": zod.string(),
   "backdropUrl": zod.string(),
+  "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
   "featured": zod.boolean(),
   "progress": zod.number().min(getHomeResponseRailsItemItemsItemProgressMin).max(getHomeResponseRailsItemItemsItemProgressMax)

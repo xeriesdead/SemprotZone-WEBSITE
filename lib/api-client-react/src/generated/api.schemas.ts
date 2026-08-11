@@ -29,6 +29,7 @@ export interface Content {
   genres: string[];
   posterUrl: string;
   backdropUrl: string;
+  videoUrl: string | null;
   rating: number;
   featured: boolean;
   /**

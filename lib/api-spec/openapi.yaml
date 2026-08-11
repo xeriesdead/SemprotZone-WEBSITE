@@ -123,6 +123,9 @@ components:
           type: string
         backdropUrl:
           type: string
+        videoUrl:
+          type: string
+          nullable: true
         rating:
           type: number
         featured:
@@ -143,6 +146,7 @@ components:
         - genres
         - posterUrl
         - backdropUrl
+        - videoUrl
         - rating
         - featured
         - progress

@@ -226,7 +226,7 @@ function Watch({ watchlist, toggle }: { watchlist: ReturnType<typeof useWatchlis
   const episodeKey = new URLSearchParams(location.split('?')[1] || '').get('episode');
   const episodes = content?.episodes || [];
   const episode = episodes.find((item) => item.id === episodeKey) || episodes[0];
-  const source = episode?.videoUrl;
+  const source = content?.type === 'series' ? episode?.videoUrl : content?.videoUrl;
   useEffect(() => {
     if (!videoRef.current) return;
     videoRef.current.muted = muted;

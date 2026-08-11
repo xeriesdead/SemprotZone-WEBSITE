@@ -27,6 +27,7 @@ type CatalogContent = {
   genres: string[];
   posterUrl: string;
   backdropUrl: string;
+  videoUrl: string | null;
   rating: number;
   featured: boolean;
   progress: number;
@@ -74,6 +75,7 @@ const contentRows = () =>
       maturity: contentsTable.maturity,
       posterUrl: contentsTable.posterUrl,
       backdropUrl: contentsTable.backdropUrl,
+      videoUrl: contentsTable.videoUrl,
       rating: contentsTable.rating,
       featured: contentsTable.featured,
       genre: genresTable.name,
@@ -109,6 +111,7 @@ const loadCatalog = async (): Promise<CatalogContent[]> => {
       genres: row.genre ? [row.genre] : [],
       posterUrl: row.posterUrl,
       backdropUrl: row.backdropUrl,
+      videoUrl: row.videoUrl,
       rating: row.rating,
       featured: row.featured,
       progress: 0,

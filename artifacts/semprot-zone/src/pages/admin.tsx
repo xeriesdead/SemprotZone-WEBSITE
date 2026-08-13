@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Film, ListVideo, LockKeyhole, LogOut, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Film, ListVideo, LockKeyhole, LogOut, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 
 type AdminContent = {
   id: string;
@@ -61,6 +61,15 @@ type EpisodeForm = {
   duration: string;
   thumbnailUrl: string;
   videoUrl: string;
+};
+
+type DoodStreamUploadResult = {
+  filecode: string;
+  embedUrl?: string;
+  downloadUrl?: string;
+  thumbnailUrl?: string;
+  splashUrl?: string;
+  title?: string;
 };
 
 const emptyForm: ContentForm = {
@@ -146,6 +155,78 @@ async function checkAdminSession() {
   if (!response.ok) return false;
   const body = (await response.json()) as { authenticated?: boolean };
   return body.authenticated === true;
+}
+
+async function uploadDoodStreamVideo(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch("/api/admin/doodstream/upload", {
+    method: "POST",
+    body: formData,
+  });
+  const body = (await response.json().catch(() => null)) as DoodStreamUploadResult & { error?: string } | null;
+  if (!response.ok) {
+    const error = new Error(body?.error || "Upload ke DoodStream gagal") as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+  if (!body?.embedUrl && !body?.downloadUrl) {
+    throw new Error("DoodStream tidak mengembalikan URL pemutaran");
+  }
+  return body;
+}
+
+function DoodStreamUpload({
+  onUploaded,
+  disabled = false,
+}: {
+  onUploaded: (result: DoodStreamUploadResult) => void;
+  disabled?: boolean;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [message, setMessage] = useState("");
+  const [uploadError, setUploadError] = useState("");
+
+  async function upload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setFileName(file.name);
+    setMessage("");
+    setUploadError("");
+    setUploading(true);
+    try {
+      const result = await uploadDoodStreamVideo(file);
+      onUploaded(result);
+      setMessage(`Berhasil di-upload · ${result.filecode}`);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload ke DoodStream gagal");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="rounded border border-amber-300/20 bg-amber-300/[.04] p-3">
+      <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-amber-300/40 px-4 text-xs font-bold text-amber-200 transition hover:bg-amber-300/10 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50">
+        <Upload className="h-4 w-4" />
+        {uploading ? "Meng-upload..." : "Upload ke DoodStream"}
+        <input
+          type="file"
+          accept="video/*"
+          className="sr-only"
+          disabled={disabled || uploading}
+          onChange={(event) => void upload(event)}
+        />
+      </label>
+      {fileName && !uploadError && !message && <span className="ml-3 text-xs text-stone-500">{fileName}</span>}
+      {message && <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-300"><CheckCircle2 className="h-3.5 w-3.5" /> {message}</p>}
+      {uploadError && <p className="mt-2 text-xs text-[#f1a18f]">{uploadError}</p>}
+      <p className="mt-2 text-[10px] leading-4 text-stone-500">File dikirim ke DoodStream melalui backend. URL embed akan diisi otomatis.</p>
+    </div>
+  );
 }
 
 function isUnauthorized(error: unknown) {
@@ -493,7 +574,7 @@ export default function Admin() {
             <Field label="Deskripsi" wide><textarea required value={form.description} onChange={(event) => updateForm("description", event.target.value)} className="min-h-24 w-full rounded border border-white/10 bg-white/[.04] px-3 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/60" placeholder="Ringkasan cerita..." /></Field>
             <Field label="Poster URL"><input required type="url" value={form.posterUrl} onChange={(event) => updateForm("posterUrl", event.target.value)} placeholder="https://..." className={inputClass()} /></Field>
             <Field label="Backdrop URL"><input required type="url" value={form.backdropUrl} onChange={(event) => updateForm("backdropUrl", event.target.value)} placeholder="https://..." className={inputClass()} /></Field>
-            <Field label="Video URL (opsional)" wide><input type="url" value={form.videoUrl} onChange={(event) => updateForm("videoUrl", event.target.value)} placeholder="https://... (belum ada upload)" className={inputClass()} /></Field>
+             <Field label="Video URL (opsional)" wide><div className="space-y-3"><input type="url" value={form.videoUrl} onChange={(event) => updateForm("videoUrl", event.target.value)} placeholder="https://... atau URL embed DoodStream" className={inputClass()} /><DoodStreamUpload onUploaded={(result) => updateForm("videoUrl", result.embedUrl || result.downloadUrl || "")} /></div></Field>
             <label className="flex items-center gap-3 text-sm text-stone-300 md:col-span-2"><input type="checkbox" checked={form.featured} onChange={(event) => updateForm("featured", event.target.checked)} className="h-4 w-4 accent-amber-300" /> Tampilkan sebagai featured</label>
             <div className="md:col-span-2"><button disabled={saving} type="submit" className="inline-flex h-11 items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-bold text-[#11161d] transition hover:bg-amber-200 disabled:cursor-wait disabled:opacity-60">{editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{saving ? "Menyimpan..." : editingId ? "Simpan perubahan" : "Tambah judul"}</button></div>
           </form>
@@ -533,7 +614,7 @@ export default function Admin() {
                <Field label="Durasi"><input required value={episodeForm.duration} onChange={(event) => updateEpisodeForm("duration", event.target.value)} placeholder="48m" className={inputClass()} /></Field>
                <Field label="Deskripsi" wide><textarea required value={episodeForm.description} onChange={(event) => updateEpisodeForm("description", event.target.value)} className="min-h-24 w-full rounded border border-white/10 bg-white/[.04] px-3 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/60" placeholder="Ringkasan episode..." /></Field>
                <Field label="Thumbnail URL"><input required type="url" value={episodeForm.thumbnailUrl} onChange={(event) => updateEpisodeForm("thumbnailUrl", event.target.value)} placeholder="https://..." className={inputClass()} /></Field>
-               <Field label="Video URL"><input required type="url" value={episodeForm.videoUrl} onChange={(event) => updateEpisodeForm("videoUrl", event.target.value)} placeholder="https://..." className={inputClass()} /></Field>
+                <Field label="Video URL"><div className="space-y-3"><input required type="url" value={episodeForm.videoUrl} onChange={(event) => updateEpisodeForm("videoUrl", event.target.value)} placeholder="https://... atau URL embed DoodStream" className={inputClass()} /><DoodStreamUpload onUploaded={(result) => updateEpisodeForm("videoUrl", result.embedUrl || result.downloadUrl || "")} /></div></Field>
                <div className="md:col-span-2"><button disabled={episodeSaving || !items.length} type="submit" className="inline-flex h-11 items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-bold text-[#11161d] transition hover:bg-amber-200 disabled:cursor-wait disabled:opacity-60">{editingEpisodeId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}{episodeSaving ? "Menyimpan..." : editingEpisodeId ? "Simpan perubahan" : "Tambah episode"}</button></div>
              </form>
            </section>

@@ -11,6 +11,7 @@ Platform streaming film dan serial gratis dengan iklan untuk penonton umum.
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
 - Required secrets for admin: `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET`
+- Optional secret for backend video uploads: `DOODSTREAM_API_KEY`
 
 ## Stack
 
@@ -31,6 +32,7 @@ Platform streaming film dan serial gratis dengan iklan untuk penonton umum.
 ## Architecture decisions
 
 - Video dirancang untuk dilayani dari penyimpanan video/CDN terpisah, bukan dari server aplikasi.
+- Upload video DoodStream dilakukan melalui endpoint backend yang memerlukan sesi admin; API key hanya dibaca dari environment variable.
 - Watchlist versi awal menggunakan penyimpanan lokal agar pengalaman bisa dipakai sebelum autentikasi dan database pengguna ditambahkan.
 - Admin memakai signed HttpOnly cookie session; credential dan signing secret hanya dibaca dari environment variables.
 - Katalog publik memakai OpenAPI dan hook React Query hasil codegen agar frontend dan API tetap sinkron.

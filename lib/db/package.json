@@ -10,7 +10,8 @@
   "scripts": {
     "seed": "tsx ./src/seed.ts",
     "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
+    "ensure-schema": "pnpm run push && pnpm run seed"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

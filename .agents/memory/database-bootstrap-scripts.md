@@ -7,4 +7,4 @@ Deploy-only database setup must use an explicit command name rather than a pnpm 
 
 **Why:** pnpm can run lifecycle-named scripts during dependency installation, which can unexpectedly connect to a database and mutate its schema or seed data.
 
-**How to apply:** Use a named command such as `ensure-schema` and invoke it explicitly from the deployment start or migration process.
+**How to apply:** Use a named command such as `ensure-schema` and invoke it explicitly from the deployment migration process. On Railway, make sure the app service receives `DATABASE_URL` before this command runs; otherwise pre-deploy fails before the web process can open its healthcheck port.

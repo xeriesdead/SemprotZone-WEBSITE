@@ -23,8 +23,11 @@ export const HealthCheckResponse = zod.object({
 export const ListCatalogQueryParams = zod.object({
   "query": zod.coerce.string().optional(),
   "genre": zod.coerce.string().optional(),
-  "type": zod.enum(['movie', 'series']).optional()
+  "type": zod.enum(['movie', 'series']).optional(),
+  "sort": zod.enum(['recent', 'popular']).optional()
 })
+
+export const listCatalogResponseViewCountMin = 0;
 
 export const listCatalogResponseProgressMin = 0;
 export const listCatalogResponseProgressMax = 100;
@@ -45,6 +48,7 @@ export const ListCatalogResponseItem = zod.object({
   "backdropUrl": zod.string(),
   "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
+  "viewCount": zod.number().min(listCatalogResponseViewCountMin),
   "featured": zod.boolean(),
   "progress": zod.number().min(listCatalogResponseProgressMin).max(listCatalogResponseProgressMax)
 })
@@ -57,6 +61,8 @@ export const ListCatalogResponse = zod.array(ListCatalogResponseItem)
 export const GetContentParams = zod.object({
   "contentId": zod.coerce.string()
 })
+
+export const getContentResponseOneViewCountMin = 0;
 
 export const getContentResponseOneProgressMin = 0;
 export const getContentResponseOneProgressMax = 100;
@@ -77,6 +83,7 @@ export const GetContentResponse = zod.object({
   "backdropUrl": zod.string(),
   "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
+  "viewCount": zod.number().min(getContentResponseOneViewCountMin),
   "featured": zod.boolean(),
   "progress": zod.number().min(getContentResponseOneProgressMin).max(getContentResponseOneProgressMax)
 }).and(zod.object({
@@ -96,8 +103,12 @@ export const GetContentResponse = zod.object({
 /**
  * @summary Get curated home page rails
  */
+export const getHomeResponseFeaturedViewCountMin = 0;
+
 export const getHomeResponseFeaturedProgressMin = 0;
 export const getHomeResponseFeaturedProgressMax = 100;
+
+export const getHomeResponseRailsItemItemsItemViewCountMin = 0;
 
 export const getHomeResponseRailsItemItemsItemProgressMin = 0;
 export const getHomeResponseRailsItemItemsItemProgressMax = 100;
@@ -119,6 +130,7 @@ export const GetHomeResponse = zod.object({
   "backdropUrl": zod.string(),
   "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
+  "viewCount": zod.number().min(getHomeResponseFeaturedViewCountMin),
   "featured": zod.boolean(),
   "progress": zod.number().min(getHomeResponseFeaturedProgressMin).max(getHomeResponseFeaturedProgressMax)
 }),
@@ -139,6 +151,7 @@ export const GetHomeResponse = zod.object({
   "backdropUrl": zod.string(),
   "videoUrl": zod.string().nullable(),
   "rating": zod.number(),
+  "viewCount": zod.number().min(getHomeResponseRailsItemItemsItemViewCountMin),
   "featured": zod.boolean(),
   "progress": zod.number().min(getHomeResponseRailsItemItemsItemProgressMin).max(getHomeResponseRailsItemItemsItemProgressMax)
 }))

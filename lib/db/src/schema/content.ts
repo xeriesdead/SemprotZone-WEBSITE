@@ -18,6 +18,7 @@ export const contentsTable = pgTable("contents", {
   rating: real("rating").notNull().default(0),
   featured: boolean("featured").notNull().default(false),
   videoUrl: text("video_url"),
+  viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

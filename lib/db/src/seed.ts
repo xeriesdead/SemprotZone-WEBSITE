@@ -21,6 +21,7 @@ type CatalogItem = {
   posterUrl: string;
   backdropUrl: string;
   rating: number;
+  viewCount?: number;
   featured: boolean;
 };
 
@@ -52,6 +53,7 @@ const catalog: CatalogItem[] = [
     backdropUrl:
       "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1800&q=90",
     rating: 8.7,
+    viewCount: 18400,
     featured: true,
   },
   {
@@ -70,6 +72,7 @@ const catalog: CatalogItem[] = [
     backdropUrl:
       "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1800&q=90",
     rating: 8.2,
+    viewCount: 12100,
     featured: false,
   },
   {
@@ -88,6 +91,7 @@ const catalog: CatalogItem[] = [
     backdropUrl:
       "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=90",
     rating: 8.4,
+    viewCount: 9700,
     featured: false,
   },
   {
@@ -106,6 +110,7 @@ const catalog: CatalogItem[] = [
     backdropUrl:
       "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=1800&q=90",
     rating: 8.9,
+    viewCount: 24600,
     featured: false,
   },
   {
@@ -124,6 +129,7 @@ const catalog: CatalogItem[] = [
     backdropUrl:
       "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1800&q=90",
     rating: 8.1,
+    viewCount: 8300,
     featured: false,
   },
 ];
@@ -202,6 +208,7 @@ async function seed() {
           posterUrl: item.posterUrl,
           backdropUrl: item.backdropUrl,
           rating: item.rating,
+          viewCount: item.viewCount ?? 0,
           featured: item.featured,
           videoUrl: null,
         })),

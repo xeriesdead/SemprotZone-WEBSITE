@@ -29,8 +29,10 @@ type CatalogContent = {
   backdropUrl: string;
   videoUrl: string | null;
   rating: number;
+  viewCount: number;
   featured: boolean;
   progress: number;
+  createdAt: Date;
 };
 
 type CatalogEpisode = {
@@ -77,7 +79,9 @@ const contentRows = () =>
       backdropUrl: contentsTable.backdropUrl,
       videoUrl: contentsTable.videoUrl,
       rating: contentsTable.rating,
+      viewCount: contentsTable.viewCount,
       featured: contentsTable.featured,
+      createdAt: contentsTable.createdAt,
       genre: genresTable.name,
     })
     .from(contentsTable)
@@ -113,7 +117,9 @@ const loadCatalog = async (): Promise<CatalogContent[]> => {
       backdropUrl: row.backdropUrl,
       videoUrl: row.videoUrl,
       rating: row.rating,
+      viewCount: row.viewCount,
       featured: row.featured,
+      createdAt: row.createdAt,
       progress: 0,
     });
   }
@@ -157,9 +163,7 @@ const matchesCatalogQuery = (
   const query = params.query?.toLowerCase();
   const matchesQuery =
     !query ||
-    `${item.title} ${item.tagline ?? ""} ${item.description} ${item.genres.join(" ")}`
-      .toLowerCase()
-      .includes(query);
+    item.title.toLowerCase().includes(query);
   const matchesGenre = !params.genre || item.genres.includes(params.genre);
   const matchesType = !params.type || item.type === params.type;
 
@@ -170,6 +174,14 @@ router.get("/catalog", async (req, res) => {
   const params = ListCatalogQueryParams.parse(req.query);
   const catalog = await loadCatalog();
   const result = catalog.filter((item) => matchesCatalogQuery(item, params));
+  if (params.sort === "popular") {
+    result.sort((a, b) => b.viewCount - a.viewCount || b.rating - a.rating);
+  } else if (params.sort === "recent") {
+    result.sort(
+      (a, b) =>
+        b.createdAt.getTime() - a.createdAt.getTime() || b.year - a.year,
+    );
+  }
 
   res.json(ListCatalogResponse.parse(result));
 });

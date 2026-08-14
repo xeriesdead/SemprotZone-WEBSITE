@@ -45,6 +45,11 @@ paths:
           schema:
             type: string
             enum: [movie, series]
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [recent, popular]
       responses:
         "200":
           description: Catalog titles
@@ -128,6 +133,9 @@ components:
           nullable: true
         rating:
           type: number
+        viewCount:
+          type: number
+          minimum: 0
         featured:
           type: boolean
         progress:
@@ -148,6 +156,7 @@ components:
         - backdropUrl
         - videoUrl
         - rating
+        - viewCount
         - featured
         - progress
     Episode:

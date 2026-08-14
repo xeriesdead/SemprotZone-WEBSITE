@@ -21,6 +21,8 @@ export interface Content {
   backdropUrl: string;
   videoUrl: string | null;
   rating: number;
+  /** @minimum 0 */
+  viewCount: number;
   featured: boolean;
   /**
      * @minimum 0

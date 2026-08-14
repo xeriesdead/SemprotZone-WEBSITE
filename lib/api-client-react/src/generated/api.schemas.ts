@@ -31,6 +31,8 @@ export interface Content {
   backdropUrl: string;
   videoUrl: string | null;
   rating: number;
+  /** @minimum 0 */
+  viewCount: number;
   featured: boolean;
   /**
      * @minimum 0
@@ -69,6 +71,7 @@ export type ListCatalogParams = {
 query?: string;
 genre?: string;
 type?: ListCatalogType;
+sort?: ListCatalogSort;
 };
 
 export type ListCatalogType = typeof ListCatalogType[keyof typeof ListCatalogType];
@@ -77,5 +80,13 @@ export type ListCatalogType = typeof ListCatalogType[keyof typeof ListCatalogTyp
 export const ListCatalogType = {
   movie: 'movie',
   series: 'series',
+} as const;
+
+export type ListCatalogSort = typeof ListCatalogSort[keyof typeof ListCatalogSort];
+
+
+export const ListCatalogSort = {
+  recent: 'recent',
+  popular: 'popular',
 } as const;
 

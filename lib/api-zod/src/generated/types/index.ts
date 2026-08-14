@@ -14,4 +14,5 @@ export * from './episode';
 export * from './healthStatus';
 export * from './homeFeed';
 export * from './listCatalogParams';
+export * from './listCatalogSort';
 export * from './listCatalogType';

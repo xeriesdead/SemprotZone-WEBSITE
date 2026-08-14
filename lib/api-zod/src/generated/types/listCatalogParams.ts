@@ -5,10 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ListCatalogSort } from './listCatalogSort';
 import type { ListCatalogType } from './listCatalogType';
 
 export type ListCatalogParams = {
 query?: string;
 genre?: string;
 type?: ListCatalogType;
+sort?: ListCatalogSort;
 };

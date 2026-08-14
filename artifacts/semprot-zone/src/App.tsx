@@ -15,7 +15,10 @@ import {
   Clock3,
   ExternalLink,
   Film,
+  Flame,
+  Grid2X2,
   Info,
+  ListFilter,
   Menu,
   Play,
   Plus,
@@ -188,6 +191,96 @@ function Home() {
   );
 }
 
+function formatViews(viewCount: number) {
+  if (viewCount >= 1_000_000) return `${(viewCount / 1_000_000).toFixed(1)}M`;
+  if (viewCount >= 1_000) return `${(viewCount / 1_000).toFixed(viewCount >= 10_000 ? 0 : 1)}K`;
+  return String(viewCount);
+}
+
+function VideoCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
+  return (
+    <article className="group min-w-0" data-testid={`card-video-${content.id}`}>
+      <div className="relative aspect-video overflow-hidden rounded-xl border border-white/[.08] bg-[#252b32] shadow-[0_14px_32px_rgba(0,0,0,.22)]">
+        <Link href={`/title/${content.id}`} className="block h-full" data-testid={`link-video-${content.id}`}>
+          <MediaImage src={content.backdropUrl || content.posterUrl} alt={content.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#10151d]/90 via-[#10151d]/10 to-transparent" />
+          <div className="absolute inset-x-3 bottom-3 flex items-center justify-between">
+            <span className="rounded bg-amber-300 px-1.5 py-1 text-[9px] font-bold tracking-wide text-[#11161d]">HD</span>
+            <span className="rounded bg-[#10151d]/80 px-2 py-1 text-[10px] font-mono-ui text-stone-200 backdrop-blur">{content.duration}</span>
+          </div>
+        </Link>
+        <button type="button" onClick={onToggle} className={cx('absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#10151d]/80 text-stone-200 backdrop-blur transition hover:bg-amber-300 hover:text-[#11161d]', saved && 'text-amber-300')} aria-label={saved ? `Remove ${content.title} from watchlist` : `Add ${content.title} to watchlist`} data-testid={`button-video-watchlist-${content.id}`}>
+          {saved ? <BookmarkCheck className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        </button>
+      </div>
+      <Link href={`/title/${content.id}`} className="mt-3 block" data-testid={`link-video-title-${content.id}`}>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="truncate text-sm font-bold text-stone-100 transition-colors group-hover:text-amber-200">{content.title}</h3>
+          <span className="shrink-0 rounded border border-white/10 px-1.5 py-0.5 text-[9px] font-mono-ui text-stone-500">{content.type === 'series' ? 'SERIES' : 'FILM'}</span>
+        </div>
+        <p className="mt-1 flex items-center gap-2 text-[10px] font-mono-ui uppercase tracking-[.08em] text-stone-500">
+          <span>{formatViews(content.viewCount)} views</span><span className="h-1 w-1 rounded-full bg-stone-700" /><span>{content.genres?.[0] || content.type}</span>
+        </p>
+      </Link>
+    </article>
+  );
+}
+
+function ModernBrowse() {
+  const [search, setSearch] = useState('');
+  const [genre, setGenre] = useState('');
+  const [type, setType] = useState('');
+  const [sort, setSort] = useState('');
+  const [tab, setTab] = useState<'trending' | 'explore' | 'recent'>('trending');
+  const [visibleCount, setVisibleCount] = useState(8);
+  const tabSort = tab === 'trending' ? 'popular' : tab === 'recent' ? 'recent' : undefined;
+  const params = useMemo(() => ({ query: search || undefined, genre: genre || undefined, type: (type || undefined) as 'movie' | 'series' | undefined, sort: (sort || tabSort || undefined) as 'recent' | 'popular' | undefined }), [search, genre, type, sort, tabSort]);
+  const { data, isLoading, isError, refetch } = useListCatalog(params, { query: { queryKey: getListCatalogQueryKey(params) } });
+  const allParams = {};
+  const { data: allData } = useListCatalog(allParams, { query: { queryKey: getListCatalogQueryKey(allParams) } });
+  const { has, toggle } = useWatchlist();
+  const catalog = (data || []) as Content[];
+  const allCatalog = (allData || []) as Content[];
+  const genreCounts = allCatalog.reduce<Record<string, number>>((counts, item) => {
+    item.genres?.forEach((itemGenre) => { counts[itemGenre] = (counts[itemGenre] || 0) + 1; });
+    return counts;
+  }, {});
+  const genres = Object.keys(genreCounts).sort((a, b) => genreCounts[b] - genreCounts[a] || a.localeCompare(b));
+  const visibleCatalog = catalog.slice(0, visibleCount);
+  useEffect(() => { setVisibleCount(8); }, [search, genre, type, sort, tab]);
+
+  return (
+    <div className="cinema-grain min-h-[100dvh] bg-[#10151d]">
+      <Header />
+      <main className="mx-auto max-w-[1440px] px-5 pb-20 pt-28 md:px-10 md:pt-36 lg:px-14">
+        <div className="mb-9 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div className="max-w-3xl animate-rise">
+            <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-amber-300/80">SemprotZone catalog</p>
+            <h1 className="mt-3 font-display text-5xl leading-none text-stone-100 md:text-7xl">Find your next <span className="text-amber-300">watch.</span></h1>
+            <p className="mt-5 max-w-lg text-sm leading-6 text-stone-400">Search the full program, follow what is trending, and find a story for every late-night mood.</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-mono-ui uppercase tracking-[.14em] text-stone-500"><ListFilter className="h-4 w-4 text-amber-300" /> {catalog.length} titles</div>
+        </div>
+        <div className="mb-8 flex flex-wrap gap-2 border-b border-white/[.08] pb-5">
+          {([['trending', 'Trending', Flame], ['explore', 'Explore', Grid2X2], ['recent', 'Recent', Clock3]] as const).map(([value, label, Icon]) => (
+            <button key={value} type="button" onClick={() => { setTab(value); if (value !== 'explore') setSort(''); }} className={cx('inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-bold transition', tab === value ? 'bg-amber-300 text-[#11161d]' : 'border border-white/10 text-stone-400 hover:border-amber-300/40 hover:text-amber-200')} data-testid={`tab-catalog-${value}`}><Icon className="h-3.5 w-3.5" />{label}</button>
+          ))}
+        </div>
+        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-white/[.08] bg-white/[.025] p-3 md:flex-row md:items-center">
+          <div className="relative flex-1 md:max-w-md"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by video title..." className="h-11 w-full rounded-full border border-white/10 bg-white/[.04] pl-10 pr-10 text-sm text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/60" aria-label="Search catalog by title" data-testid="input-search-catalog" />{search && <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-200" aria-label="Clear search" data-testid="button-clear-search"><X className="h-4 w-4" /></button>}</div>
+          <div className="flex flex-wrap gap-2">
+            <label className="relative"><select value={genre} onChange={(event) => setGenre(event.target.value)} className="h-11 max-w-[180px] appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Filter by genre" data-testid="select-genre"><option value="">All genres</option>{genres.map((itemGenre) => <option key={itemGenre} value={itemGenre}>{itemGenre}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
+            <label className="relative"><select value={type} onChange={(event) => setType(event.target.value)} className="h-11 appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Filter by type" data-testid="select-type"><option value="">All types</option><option value="movie">Films</option><option value="series">Series</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
+            <label className="relative"><select value={sort} onChange={(event) => { setSort(event.target.value); setTab('explore'); }} className="h-11 appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Sort catalog" data-testid="select-sort"><option value="">Default order</option><option value="recent">Newest</option><option value="popular">Popular</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
+          </div>
+        </div>
+        {genres.length > 0 && <div className="mb-9 flex items-center gap-3 overflow-x-auto pb-1"><span className="shrink-0 text-[10px] font-mono-ui uppercase tracking-[.16em] text-stone-600">Trending tags</span>{genres.slice(0, 6).map((itemGenre) => <button key={itemGenre} type="button" onClick={() => setGenre(itemGenre)} className={cx('shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold transition', genre === itemGenre ? 'border-amber-300/60 bg-amber-300/10 text-amber-200' : 'border-white/10 text-stone-400 hover:border-amber-300/40 hover:text-amber-200')} data-testid={`tag-genre-${itemGenre.toLowerCase()}`}>#{itemGenre}</button>)}</div>}
+        {isLoading ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3,4,5,6].map((item) => <div key={item}><div className="aspect-video animate-shimmer rounded-xl" /><div className="mt-3 h-4 w-3/4 animate-shimmer rounded" /><div className="mt-2 h-3 w-1/2 animate-shimmer rounded" /></div>)}</div> : isError ? <ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /> : !catalog.length ? <EmptyState title="No matching stories." message={search ? `Nothing matches “${search}”. Try a different title or clear the filters.` : 'The catalog is waiting for its next reel.'} /> : <><div className="grid gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">{visibleCatalog.map((item) => <VideoCard key={item.id} content={item} saved={has(item.id)} onToggle={() => toggle(item.id)} />)}</div>{visibleCount < catalog.length && <div className="mt-12 flex justify-center"><button type="button" onClick={() => setVisibleCount((count) => count + 8)} className="inline-flex h-11 items-center rounded-full border border-amber-300/50 px-6 text-xs font-bold text-amber-200 transition hover:bg-amber-300 hover:text-[#11161d]" data-testid="button-load-more">Load more</button></div>}</>}
+      </main>
+    </div>
+  );
+}
+
 function Browse() {
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('');
@@ -250,7 +343,7 @@ function Watch({ watchlist, toggle }: { watchlist: ReturnType<typeof useWatchlis
 
 function AppRouter() {
   const watchlist = useWatchlist();
-  return <Switch><Route path="/" component={Home} /><Route path="/browse" component={Browse} /><Route path="/admin" component={Admin} /><Route path="/title/:id"><Detail watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route path="/watch/:id"><Watch watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route component={NotFound} /></Switch>;
+  return <Switch><Route path="/" component={Home} /><Route path="/browse" component={ModernBrowse} /><Route path="/admin" component={Admin} /><Route path="/title/:id"><Detail watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route path="/watch/:id"><Watch watchlist={watchlist} toggle={watchlist.toggle} /></Route><Route component={NotFound} /></Switch>;
 }
 
 function App() {

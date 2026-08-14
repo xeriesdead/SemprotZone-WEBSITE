@@ -126,7 +126,7 @@ function WatchlistButton({ content, saved, onToggle, light = false }: { content:
 
 function PosterCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
   return (
-    <div className="poster-card group relative min-w-[138px] max-w-[138px] md:min-w-[178px] md:max-w-[178px]" data-testid={`card-content-${content.id}`}>
+    <div className="poster-card group relative min-w-0 max-w-none md:min-w-[178px] md:max-w-[178px]" data-testid={`card-content-${content.id}`}>
       <Link href={`/title/${content.id}`} className="block" data-testid={`link-content-${content.id}`}>
         <div className="relative aspect-[2/3] overflow-hidden rounded-[5px] bg-[#252b32] shadow-[0_9px_25px_rgba(0,0,0,.22)]">
           <MediaImage src={content.posterUrl} alt={content.title} className="h-full w-full object-cover" />
@@ -148,7 +148,7 @@ function Rail({ title, items, saved, onToggle }: { title: string; items: Content
   return (
     <section className="group/rail relative mb-12 md:mb-16" data-testid={`section-rail-${title.toLowerCase().replace(/\s/g, '-')}`}>
       <div className="mb-5 flex items-end justify-between"><div><p className="mb-2 font-mono-ui text-[9px] uppercase tracking-[.22em] text-amber-300/75">Curated tonight</p><h2 className="font-display text-2xl text-stone-100 md:text-[29px]">{title}</h2></div><div className="hidden gap-1 md:flex"><button type="button" onClick={() => move(-420)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-stone-400 transition hover:border-amber-300/50 hover:text-amber-200" aria-label={`Previous ${title}`} data-testid={`button-previous-${title}`}><ChevronLeft className="h-4 w-4" /></button><button type="button" onClick={() => move(420)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-stone-400 transition hover:border-amber-300/50 hover:text-amber-200" aria-label={`Next ${title}`} data-testid={`button-next-${title}`}><ChevronRight className="h-4 w-4" /></button></div></div>
-      <div ref={railRef} className="hide-scrollbar flex gap-4 overflow-x-auto pb-3 md:gap-5">{items.map((item) => <PosterCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>
+      <div ref={railRef} className="hide-scrollbar grid grid-cols-3 gap-x-3 gap-y-6 pb-3 sm:grid-cols-4 md:flex md:gap-5 md:overflow-x-auto">{items.map((item) => <PosterCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>
     </section>
   );
 }

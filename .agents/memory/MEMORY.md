@@ -1,1 +1,2 @@
 - [Media URL contract](media-url-contract.md) — catalog verification must cover both content-level movie URLs and episode-level series URLs.
+- [Artifact workflow environment](workflow-artifact-env.md) — managed artifact workflows may omit required PORT/BASE_PATH values and cannot be overridden generically.

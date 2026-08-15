@@ -37,6 +37,10 @@ const commands = [
     args: ["--filter", "@workspace/db", "run", "push-force"],
   },
   {
+    label: "schema compatibility repair",
+    args: ["--filter", "@workspace/db", "run", "repair-schema"],
+  },
+  {
     label: "catalog seed",
     args: ["--filter", "@workspace/db", "run", "seed"],
   },

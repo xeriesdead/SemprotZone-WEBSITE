@@ -6,7 +6,7 @@
   },
   "deploy": {
     "preDeployCommand": [
-      "pnpm --filter @workspace/db run ensure-schema"
+      "pnpm --filter @workspace/db run push-force && pnpm --filter @workspace/db run seed"
     ],
     "startCommand": "node --enable-source-maps artifacts/api-server/dist/index.mjs",
     "healthcheckPath": "/api/healthz",

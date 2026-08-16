@@ -74,36 +74,38 @@ function MediaImage({ src, alt, className, ...props }: { src?: string; alt: stri
   return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} {...props} />;
 }
 
-function Logo({ compact = false }: { compact?: boolean }) {
+function Logo({ compact = false, catalog = false }: { compact?: boolean; catalog?: boolean }) {
   return (
     <Link href="/" className="group flex items-center gap-2.5" data-testid="link-logo">
-      <span className="relative flex h-8 w-8 items-center justify-center rounded-[9px] bg-amber-300 text-[#11161d] shadow-[0_5px_18px_rgba(245,188,92,.18)]">
+      <span className={cx('relative flex h-8 w-8 items-center justify-center rounded-[9px] shadow-[0_5px_18px_rgba(245,188,92,.18)]', catalog ? 'bg-white text-[#e6004d]' : 'bg-amber-300 text-[#11161d]')}>
         <Clapperboard className="h-[17px] w-[17px]" strokeWidth={2.3} />
-        <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-[#e47b67]" />
+        <span className={cx('absolute -right-1 -top-1 h-2 w-2 rounded-full', catalog ? 'bg-[#5bb45d]' : 'bg-[#e47b67]')} />
       </span>
-      {!compact && <span className="font-mono-ui text-[13px] font-bold tracking-[.18em] text-stone-100 transition-colors group-hover:text-amber-200">SEMPR<span className="text-amber-300">OT</span> ZONE</span>}
+      {!compact && <span className={cx('font-mono-ui text-[13px] font-bold tracking-[.18em] transition-colors', catalog ? 'text-white group-hover:text-white/80' : 'text-stone-100 group-hover:text-amber-200')}>SEMPR<span className={catalog ? 'text-white/70' : 'text-amber-300'}>OT</span> ZONE</span>}
     </Link>
   );
 }
 
-function Header({ onSearch }: { onSearch?: () => void }) {
+function Header({ onSearch, catalog = false, searchValue, onSearchChange }: { onSearch?: () => void; catalog?: boolean; searchValue?: string; onSearchChange?: (value: string) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="absolute inset-x-0 top-0 z-40">
-      <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 md:px-10 lg:px-14">
-        <Logo />
-        <nav className="hidden items-center gap-8 text-[13px] font-semibold tracking-wide text-stone-300 md:flex">
+    <header className={cx('z-40', catalog ? 'relative bg-[#f30812] text-white' : 'absolute inset-x-0 top-0')}>
+      <div className={cx('mx-auto flex max-w-[1440px] items-center justify-between px-5 md:px-10 lg:px-14', catalog ? 'h-[70px]' : 'h-[76px]')}>
+        <Logo catalog={catalog} />
+        {catalog && onSearchChange && <div className="mx-8 hidden max-w-[610px] flex-1 md:block"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/75" /><input value={searchValue || ''} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search movie" className="h-9 w-full rounded border border-white/80 bg-transparent pl-9 pr-3 text-sm text-white outline-none placeholder:text-white/75 focus:bg-white/10" aria-label="Search movie" /></div></div>}
+        <nav className={cx('items-center text-[13px] font-semibold tracking-wide', catalog ? 'hidden' : 'hidden gap-8 text-stone-300 md:flex')}>
           <Link href="/" className="transition-colors hover:text-amber-200" data-testid="link-home">Home</Link>
           <Link href="/browse" className="transition-colors hover:text-amber-200" data-testid="link-browse">Browse</Link>
           <a href="#about" className="transition-colors hover:text-amber-200" data-testid="link-about">About</a>
         </nav>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onSearch} className="flex h-9 w-9 items-center justify-center rounded-full text-stone-300 transition-colors hover:bg-white/10 hover:text-amber-200" aria-label="Search" data-testid="button-header-search"><Search className="h-[18px] w-[18px]" /></button>
-          <button type="button" className="hidden h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3.5 text-xs font-semibold text-stone-200 transition-colors hover:border-amber-300/40 hover:text-amber-200 sm:flex" data-testid="button-profile"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e47b67] text-[10px] font-bold text-[#1b171b]">SZ</span> Guest</button>
+          <button type="button" onClick={onSearch} className={cx('flex h-9 w-9 items-center justify-center transition-colors', catalog ? 'text-white md:hidden' : 'rounded-full text-stone-300 hover:bg-white/10 hover:text-amber-200')} aria-label="Search" data-testid="button-header-search"><Search className="h-[18px] w-[18px]" /></button>
+          {!catalog && <button type="button" className="hidden h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3.5 text-xs font-semibold text-stone-200 transition-colors hover:border-amber-300/40 hover:text-amber-200 sm:flex" data-testid="button-profile"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e47b67] text-[10px] font-bold text-[#1b171b]">SZ</span> Guest</button>}
           <button type="button" onClick={() => setMenuOpen((open) => !open)} className="flex h-9 w-9 items-center justify-center text-stone-200 md:hidden" aria-label="Open menu" data-testid="button-mobile-menu">{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
         </div>
       </div>
-      {menuOpen && <div className="border-y border-white/10 bg-[#11161e]/95 px-6 py-4 backdrop-blur-lg md:hidden"><div className="flex flex-col gap-4 text-sm font-semibold text-stone-200"><Link href="/" data-testid="link-mobile-home">Home</Link><Link href="/browse" data-testid="link-mobile-browse">Browse</Link><a href="#about" data-testid="link-mobile-about">About</a></div></div>}
+      {catalog && <nav className="hidden h-[38px] items-center gap-7 bg-[#e6004d] px-5 text-xs font-semibold md:flex md:px-10 lg:px-14"><Link href="/" className="hover:text-white/75" data-testid="link-catalog-home">Home</Link><Link href="/browse" className="text-white/75 hover:text-white" data-testid="link-catalog-browse">Catalog</Link><a href="#latest" className="hover:text-white/75">Latest Movie</a><a href="#trending" className="hover:text-white/75">Trending</a><a href="#series" className="hover:text-white/75">Series</a></nav>}
+      {menuOpen && <div className={cx('border-y px-6 py-4 md:hidden', catalog ? 'border-white/20 bg-[#e6004d]' : 'border-white/10 bg-[#11161e]/95 backdrop-blur-lg')}><div className="flex flex-col gap-4 text-sm font-semibold text-white"><Link href="/" data-testid="link-mobile-home">Home</Link><Link href="/browse" data-testid="link-mobile-browse">Catalog</Link><a href="#latest" data-testid="link-mobile-latest">Latest Movie</a><a href="#trending" data-testid="link-mobile-trending">Trending</a></div></div>}
     </header>
   );
 }
@@ -226,6 +228,24 @@ function VideoCard({ content, saved, onToggle }: { content: Content; saved: bool
   );
 }
 
+function CatalogPosterCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
+  return (
+    <article className="catalog-poster group relative min-w-0" data-testid={`card-catalog-${content.id}`}>
+      <Link href={`/title/${content.id}`} className="block" data-testid={`link-catalog-${content.id}`}>
+        <div className="relative aspect-[2/3] overflow-hidden rounded-[5px] bg-[#d7d7d7] shadow-sm">
+          <MediaImage src={content.posterUrl || content.backdropUrl} alt={content.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          <div className="absolute inset-x-2 bottom-2 text-center text-[11px] font-medium leading-4 text-white drop-shadow-md">{content.title}</div>
+          <div className="absolute left-1.5 top-1.5 rounded bg-[#343434]/85 px-1.5 py-0.5 text-[10px] font-semibold text-white"><Star className="mr-0.5 inline h-3 w-3 fill-[#ffd13b] text-[#ffd13b]" />{content.rating.toFixed(1)}</div>
+        </div>
+      </Link>
+      <button type="button" onClick={onToggle} className={cx('absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-[#e6004d]', saved && 'text-[#ffd13b]')} aria-label={saved ? `Remove ${content.title} from watchlist` : `Add ${content.title} to watchlist`} data-testid={`button-catalog-watchlist-${content.id}`}>
+        {saved ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+      </button>
+    </article>
+  );
+}
+
 function ModernBrowse() {
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('');
@@ -250,32 +270,32 @@ function ModernBrowse() {
   useEffect(() => { setVisibleCount(8); }, [search, genre, type, sort, tab]);
 
   return (
-    <div className="cinema-grain min-h-[100dvh] bg-[#10151d]">
-      <Header />
-      <main className="mx-auto max-w-[1440px] px-5 pb-20 pt-28 md:px-10 md:pt-36 lg:px-14">
-        <div className="mb-9 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div className="max-w-3xl animate-rise">
-            <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-amber-300/80">SemprotZone catalog</p>
-            <h1 className="mt-3 font-display text-5xl leading-none text-stone-100 md:text-7xl">Find your next <span className="text-amber-300">watch.</span></h1>
-            <p className="mt-5 max-w-lg text-sm leading-6 text-stone-400">Search the full program, follow what is trending, and find a story for every late-night mood.</p>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-mono-ui uppercase tracking-[.14em] text-stone-500"><ListFilter className="h-4 w-4 text-amber-300" /> {catalog.length} titles</div>
+    <div className="catalog-page min-h-[100dvh] bg-white text-[#242424]">
+      <Header catalog searchValue={search} onSearchChange={setSearch} onSearch={() => document.querySelector<HTMLInputElement>('[data-testid="input-search-catalog"]')?.focus()} />
+      <main className="mx-auto max-w-[1080px] px-3 pb-16 pt-5 md:px-5">
+        <div className="mb-4 border-b border-[#dedede] pb-3 text-xs font-semibold text-[#222]"><span>Bookmark</span> <span className="text-[#e6004d]">https://semprot.zone</span> Untuk Update Alamat Tanpa VPN Terbaru.</div>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div><p className="text-[10px] font-bold uppercase tracking-[.08em] text-[#e6004d]">Semprot Zone catalog</p><h1 className="mt-1 text-2xl font-bold leading-none text-[#272727]">Find your next watch</h1></div>
+          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide text-[#666]"><ListFilter className="h-4 w-4 text-[#e6004d]" /> {catalog.length} titles</div>
         </div>
-        <div className="mb-8 flex flex-wrap gap-2 border-b border-white/[.08] pb-5">
+        <div className="mb-4 flex flex-wrap gap-2 border-b border-[#dedede] pb-3">
           {([['trending', 'Trending', Flame], ['explore', 'Explore', Grid2X2], ['recent', 'Recent', Clock3]] as const).map(([value, label, Icon]) => (
-            <button key={value} type="button" onClick={() => { setTab(value); if (value !== 'explore') setSort(''); }} className={cx('inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-bold transition', tab === value ? 'bg-amber-300 text-[#11161d]' : 'border border-white/10 text-stone-400 hover:border-amber-300/40 hover:text-amber-200')} data-testid={`tab-catalog-${value}`}><Icon className="h-3.5 w-3.5" />{label}</button>
+            <button key={value} type="button" onClick={() => { setTab(value); if (value !== 'explore') setSort(''); }} className={cx('inline-flex h-8 items-center gap-2 rounded px-3 text-xs font-bold transition', tab === value ? 'bg-[#e6004d] text-white' : 'border border-[#d7d7d7] bg-white text-[#666] hover:border-[#e6004d] hover:text-[#e6004d]')} data-testid={`tab-catalog-${value}`}><Icon className="h-3.5 w-3.5" />{label}</button>
           ))}
         </div>
-        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-white/[.08] bg-white/[.025] p-3 md:flex-row md:items-center">
-          <div className="relative flex-1 md:max-w-md"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by video title..." className="h-11 w-full rounded-full border border-white/10 bg-white/[.04] pl-10 pr-10 text-sm text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/60" aria-label="Search catalog by title" data-testid="input-search-catalog" />{search && <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-200" aria-label="Clear search" data-testid="button-clear-search"><X className="h-4 w-4" /></button>}</div>
+        <div className="mb-6 flex flex-col gap-2 border-y border-[#dedede] bg-[#f7f7f7] p-2 md:flex-row md:items-center">
+          <div className="relative flex-1 md:max-w-md"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#888]" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by movie title..." className="h-10 w-full rounded border border-[#d2d2d2] bg-white pl-10 pr-10 text-sm text-[#242424] outline-none transition placeholder:text-[#999] focus:border-[#e6004d]" aria-label="Search catalog by title" data-testid="input-search-catalog" />{search && <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-[#e6004d]" aria-label="Clear search" data-testid="button-clear-search"><X className="h-4 w-4" /></button>}</div>
           <div className="flex flex-wrap gap-2">
-            <label className="relative"><select value={genre} onChange={(event) => setGenre(event.target.value)} className="h-11 max-w-[180px] appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Filter by genre" data-testid="select-genre"><option value="">All genres</option>{genres.map((itemGenre) => <option key={itemGenre} value={itemGenre}>{itemGenre}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
-            <label className="relative"><select value={type} onChange={(event) => setType(event.target.value)} className="h-11 appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Filter by type" data-testid="select-type"><option value="">All types</option><option value="movie">Films</option><option value="series">Series</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
-            <label className="relative"><select value={sort} onChange={(event) => { setSort(event.target.value); setTab('explore'); }} className="h-11 appearance-none rounded-full border border-white/10 bg-white/[.04] px-4 pr-9 text-xs font-bold text-stone-300 outline-none focus:border-amber-300/50" aria-label="Sort catalog" data-testid="select-sort"><option value="">Default order</option><option value="recent">Newest</option><option value="popular">Popular</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 text-stone-500" /></label>
+            <label className="relative"><select value={genre} onChange={(event) => setGenre(event.target.value)} className="h-10 max-w-[180px] appearance-none rounded border border-[#d2d2d2] bg-white px-3 pr-8 text-xs font-bold text-[#555] outline-none focus:border-[#e6004d]" aria-label="Filter by genre" data-testid="select-genre"><option value="">All genres</option>{genres.map((itemGenre) => <option key={itemGenre} value={itemGenre}>{itemGenre}</option>)}</select><ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#888]" /></label>
+            <label className="relative"><select value={type} onChange={(event) => setType(event.target.value)} className="h-10 appearance-none rounded border border-[#d2d2d2] bg-white px-3 pr-8 text-xs font-bold text-[#555] outline-none focus:border-[#e6004d]" aria-label="Filter by type" data-testid="select-type"><option value="">All types</option><option value="movie">Films</option><option value="series">Series</option></select><ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#888]" /></label>
+            <label className="relative"><select value={sort} onChange={(event) => { setSort(event.target.value); setTab('explore'); }} className="h-10 appearance-none rounded border border-[#d2d2d2] bg-white px-3 pr-8 text-xs font-bold text-[#555] outline-none focus:border-[#e6004d]" aria-label="Sort catalog" data-testid="select-sort"><option value="">Default order</option><option value="recent">Newest</option><option value="popular">Popular</option></select><ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#888]" /></label>
           </div>
         </div>
-        {genres.length > 0 && <div className="mb-9 flex items-center gap-3 overflow-x-auto pb-1"><span className="shrink-0 text-[10px] font-mono-ui uppercase tracking-[.16em] text-stone-600">Trending tags</span>{genres.slice(0, 6).map((itemGenre) => <button key={itemGenre} type="button" onClick={() => setGenre(itemGenre)} className={cx('shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold transition', genre === itemGenre ? 'border-amber-300/60 bg-amber-300/10 text-amber-200' : 'border-white/10 text-stone-400 hover:border-amber-300/40 hover:text-amber-200')} data-testid={`tag-genre-${itemGenre.toLowerCase()}`}>#{itemGenre}</button>)}</div>}
-        {isLoading ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3,4,5,6].map((item) => <div key={item}><div className="aspect-video animate-shimmer rounded-xl" /><div className="mt-3 h-4 w-3/4 animate-shimmer rounded" /><div className="mt-2 h-3 w-1/2 animate-shimmer rounded" /></div>)}</div> : isError ? <ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /> : !catalog.length ? <EmptyState title="No matching stories." message={search ? `Nothing matches “${search}”. Try a different title or clear the filters.` : 'The catalog is waiting for its next reel.'} /> : <><div className="grid gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">{visibleCatalog.map((item) => <VideoCard key={item.id} content={item} saved={has(item.id)} onToggle={() => toggle(item.id)} />)}</div>{visibleCount < catalog.length && <div className="mt-12 flex justify-center"><button type="button" onClick={() => setVisibleCount((count) => count + 8)} className="inline-flex h-11 items-center rounded-full border border-amber-300/50 px-6 text-xs font-bold text-amber-200 transition hover:bg-amber-300 hover:text-[#11161d]" data-testid="button-load-more">Load more</button></div>}</>}
+        {genres.length > 0 && <div className="mb-5 flex items-center gap-3 overflow-x-auto pb-1"><span className="shrink-0 text-[10px] font-bold uppercase tracking-[.16em] text-[#888]">Trending tags</span>{genres.slice(0, 6).map((itemGenre) => <button key={itemGenre} type="button" onClick={() => setGenre(itemGenre)} className={cx('shrink-0 rounded border px-2.5 py-1 text-[10px] font-semibold transition', genre === itemGenre ? 'border-[#e6004d] bg-[#e6004d] text-white' : 'border-[#d7d7d7] text-[#666] hover:border-[#e6004d] hover:text-[#e6004d]')} data-testid={`tag-genre-${itemGenre.toLowerCase()}`}>#{itemGenre}</button>)}</div>}
+        <section id="latest">
+          <div className="mb-3 flex items-center justify-between gap-3"><h2 className="catalog-section-title">LATEST MOVIE</h2><Link href="/browse" className="catalog-more-link">MORE MOVIE</Link></div>
+          {isLoading ? <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">{[1,2,3,4,5,6,7,8].map((item) => <div key={item}><div className="aspect-[2/3] animate-shimmer rounded-[5px]" /></div>)}</div> : isError ? <ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /> : !catalog.length ? <EmptyState title="No matching stories." message={search ? `Nothing matches “${search}”. Try a different title or clear the filters.` : 'The catalog is waiting for its next reel.'} /> : <><div className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">{visibleCatalog.map((item) => <CatalogPosterCard key={item.id} content={item} saved={has(item.id)} onToggle={() => toggle(item.id)} />)}</div>{visibleCount < catalog.length && <div className="mt-8 flex justify-center"><button type="button" onClick={() => setVisibleCount((count) => count + 8)} className="inline-flex h-9 items-center rounded bg-[#e6004d] px-5 text-xs font-bold text-white transition hover:bg-[#c90043]" data-testid="button-load-more">Load more</button></div>}</>}
+        </section>
       </main>
     </div>
   );

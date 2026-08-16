@@ -8,7 +8,6 @@ import {
   BookmarkCheck,
   Check,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   CircleAlert,
   Clapperboard,
@@ -90,7 +89,7 @@ function Header({ onSearch, catalog = false, searchValue, onSearchChange }: { on
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header className={cx('z-40', catalog ? 'relative bg-[#f30812] text-white' : 'absolute inset-x-0 top-0')}>
-      <div className={cx('mx-auto flex max-w-[1440px] items-center justify-between px-5 md:px-10 lg:px-14', catalog ? 'h-[70px]' : 'h-[76px]')}>
+      <div className={cx('mx-auto flex px-5 md:px-10 lg:px-14', catalog ? 'h-[70px] max-w-[1080px] items-center justify-between' : 'h-[76px] max-w-[1440px] items-center justify-between')}>
         <Logo catalog={catalog} />
         {catalog && onSearchChange && <div className="mx-8 hidden max-w-[610px] flex-1 md:block"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/75" /><input value={searchValue || ''} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search movie" className="h-9 w-full rounded border border-white/80 bg-transparent pl-9 pr-3 text-sm text-white outline-none placeholder:text-white/75 focus:bg-white/10" aria-label="Search movie" /></div></div>}
         <nav className={cx('items-center text-[13px] font-semibold tracking-wide', catalog ? 'hidden' : 'hidden gap-8 text-stone-300 md:flex')}>
@@ -144,19 +143,17 @@ function PosterCard({ content, saved, onToggle }: { content: Content; saved: boo
 }
 
 function Rail({ title, items, saved, onToggle }: { title: string; items: Content[]; saved: (id: string) => boolean; onToggle: (content: Content) => void }) {
-  const railRef = useRef<HTMLDivElement>(null);
-  const move = (distance: number) => railRef.current?.scrollBy({ left: distance, behavior: 'smooth' });
   if (!items?.length) return null;
   return (
-    <section className="group/rail relative mb-12 md:mb-16" data-testid={`section-rail-${title.toLowerCase().replace(/\s/g, '-')}`}>
-      <div className="mb-5 flex items-center justify-between rounded-[5px] bg-[#e6004d] px-3 py-2.5 shadow-[0_6px_18px_rgba(230,0,77,.18)]"><div><p className="mb-0.5 font-mono-ui text-[9px] uppercase tracking-[.22em] text-white/75">Curated tonight</p><h2 className="font-display text-xl text-white md:text-2xl">{title}</h2></div><div className="hidden gap-1 md:flex"><button type="button" onClick={() => move(-420)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/30 text-white/80 transition hover:border-white hover:bg-white/15 hover:text-white" aria-label={`Previous ${title}`} data-testid={`button-previous-${title}`}><ChevronLeft className="h-4 w-4" /></button><button type="button" onClick={() => move(420)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/30 text-white/80 transition hover:border-white hover:bg-white/15 hover:text-white" aria-label={`Next ${title}`} data-testid={`button-next-${title}`}><ChevronRight className="h-4 w-4" /></button></div></div>
-      <div ref={railRef} className="hide-scrollbar grid grid-cols-3 gap-x-3 gap-y-6 pb-3 sm:grid-cols-4 md:flex md:gap-5 md:overflow-x-auto">{items.map((item) => <PosterCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>
+    <section className="mb-6" data-testid={`section-rail-${title.toLowerCase().replace(/\s/g, '-')}`}>
+      <div className="mb-2 flex items-center justify-between gap-2"><h2 className="catalog-section-title">{title.toUpperCase()}</h2><Link href="/browse" className="catalog-more-link">MORE MOVIE</Link></div>
+      <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">{items.map((item) => <CatalogPosterCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>
     </section>
   );
 }
 
 function SkeletonRail() {
-  return <section className="mb-14"><div className="mb-5 h-8 w-44 animate-shimmer rounded" /><div className="hide-scrollbar flex gap-4 overflow-hidden">{[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="min-w-[138px] md:min-w-[178px]"><div className="aspect-[2/3] animate-shimmer rounded-[5px]" /><div className="mt-3 h-3 w-3/4 animate-shimmer rounded" /></div>)}</div></section>;
+  return <section className="mb-6"><div className="mb-2 h-6 animate-shimmer rounded-[4px]" /><div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">{[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div key={item}><div className="aspect-[2/3] animate-shimmer rounded-[5px]" /></div>)}</div></section>;
 }
 
 function ErrorState({ message, retry }: { message: string; retry: () => void }) {
@@ -169,25 +166,21 @@ function EmptyState({ title, message }: { title: string; message: string }) {
 
 function Home() {
   const { data, isLoading, isError, refetch } = useGetHome();
-  const { items, toggle, has } = useWatchlist();
+  const { toggle, has } = useWatchlist();
   const [, setLocation] = useLocation();
+  const [search, setSearch] = useState('');
   const feed = data as HomeFeed | undefined;
-  const featured = feed?.featured;
   return (
-    <div className="cinema-grain min-h-[100dvh] bg-[#10151d]">
-      <Header onSearch={() => setLocation('/browse')} />
-      {isLoading ? <><div className="h-[590px] animate-shimmer md:h-[700px]" /><main className="mx-auto max-w-[1440px] px-5 py-14 md:px-10"><SkeletonRail /><SkeletonRail /></main></> : isError ? <><div className="pt-20"><ErrorState message="We couldn't reach the screening room. Check your connection and try once more." retry={() => refetch()} /></div></> : !feed || !featured ? <><div className="pt-20"><EmptyState title="No screenings tonight." message="There is nothing in the public catalog yet. Check back after the next programming drop." /></div></> : <>
-        <section className="relative min-h-[620px] overflow-hidden md:min-h-[735px]">
-          <MediaImage src={featured.backdropUrl || featured.posterUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-center opacity-80" />
-          <div className="hero-vignette absolute inset-0" />
-          <div className="relative mx-auto flex min-h-[620px] max-w-[1440px] items-end px-5 pb-20 pt-32 md:min-h-[735px] md:items-center md:px-10 md:pb-6 lg:px-14"><div className="max-w-xl animate-rise"><div className="mb-5 flex items-center gap-3"><span className="flex items-center gap-2 font-mono-ui text-[10px] font-bold uppercase tracking-[.2em] text-amber-300"><span className="h-1.5 w-1.5 rounded-full bg-amber-300" /> Featured tonight</span><span className="text-[10px] uppercase tracking-[.18em] text-stone-400">Semprot original selection</span></div><h1 className="font-display text-5xl leading-[.94] tracking-[-.035em] text-stone-100 md:text-7xl">{featured.title}</h1><p className="mt-4 max-w-lg text-base font-medium leading-7 text-stone-300 md:text-lg">{featured.tagline}</p><Meta content={featured} className="mt-6" /><p className="mt-5 line-clamp-3 max-w-lg text-sm leading-6 text-stone-400">{featured.description}</p><div className="mt-8 flex flex-wrap gap-3"><Link href={`/watch/${featured.id}`} className="inline-flex h-11 items-center gap-2 rounded-full bg-amber-300 px-5 text-xs font-bold text-[#11161d] transition-all hover:-translate-y-0.5 hover:bg-amber-200" data-testid={`link-play-featured-${featured.id}`}><Play className="h-4 w-4 fill-current" /> Start watching</Link><WatchlistButton content={featured} saved={has(featured.id)} onToggle={() => toggle(featured.id)} /></div></div></div>
-        </section>
-        <main className="mx-auto max-w-[1440px] px-5 pb-16 pt-12 md:px-10 md:pt-16 lg:px-14">
-          <div className="mb-10 flex items-center justify-between border-b border-white/[.08] pb-5"><div><p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-stone-500">The house program</p><h2 className="mt-1 font-display text-3xl text-stone-100 md:text-4xl">Find your next after-hours story.</h2></div><Link href="/browse" className="hidden items-center gap-2 text-xs font-bold text-amber-200 transition hover:text-amber-100 sm:flex" data-testid="link-explore-all">Explore all <ArrowLeft className="h-4 w-4 rotate-180" /></Link></div>
+    <div className="catalog-page min-h-[100dvh] bg-white text-[#242424]">
+      <Header catalog searchValue={search} onSearchChange={setSearch} onSearch={() => setLocation(`/browse${search ? `?query=${encodeURIComponent(search)}` : ''}`)} />
+      {isLoading ? <main className="mx-auto max-w-[1080px] px-3 pb-16 pt-5 md:px-5"><div className="mb-4 h-4 w-full animate-shimmer rounded" /><SkeletonRail /><SkeletonRail /></main> : isError ? <main className="pt-20"><ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /></main> : !feed ? <main className="pt-20"><EmptyState title="No screenings tonight." message="There is nothing in the public catalog yet. Check back after the next programming drop." /></main> : <>
+        <main className="mx-auto max-w-[1080px] px-3 pb-16 pt-5 md:px-5">
+          <div className="mb-4 border-b border-[#dedede] pb-3 text-xs font-semibold text-[#222]"><span>Bookmark</span> <span className="text-[#e6004d]">https://semprot.zone</span> Untuk Update Alamat Tanpa VPN Terbaru.</div>
+          <div className="mb-4 flex items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.08em] text-[#e6004d]">Semprot Zone</p><h1 className="mt-1 text-2xl font-bold leading-none text-[#272727]">Nonton film pilihan terbaru</h1></div><Link href="/browse" className="hidden text-xs font-bold text-[#e6004d] sm:block" data-testid="link-explore-all">LIHAT SEMUA</Link></div>
           {feed.rails?.map((rail) => <Rail key={rail.id} title={rail.title} items={rail.items} saved={has} onToggle={(content) => toggle(content.id)} />)}
           {!feed.rails?.length && <EmptyState title="The program is between reels." message="Browse the catalog to see everything currently available." />}
         </main>
-        <footer id="about" className="border-t border-white/[.08] px-5 py-10 md:px-10 lg:px-14"><div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-5 text-[11px] text-stone-500 sm:flex-row"><Logo compact /><p>Free to watch. Supported by a few well-placed pauses.</p><span className="font-mono-ui uppercase tracking-[.14em]">© Semprot Zone</span></div></footer>
+        <footer id="about" className="border-t border-[#e5e5e5] px-5 py-8"><div className="mx-auto flex max-w-[1080px] flex-col justify-between gap-3 text-[11px] text-[#888] sm:flex-row"><span className="font-bold text-[#e6004d]">SEMProt ZONE</span><p>Free to watch. Supported by a few well-placed pauses.</p><span>© Semprot Zone</span></div></footer>
       </>}
     </div>
   );
@@ -247,7 +240,7 @@ function CatalogPosterCard({ content, saved, onToggle }: { content: Content; sav
 }
 
 function ModernBrowse() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get('query') || '');
   const [genre, setGenre] = useState('');
   const [type, setType] = useState('');
   const [sort, setSort] = useState('');

@@ -129,9 +129,9 @@
 .poster-card:hover { transform: translateY(-7px); box-shadow: 0 18px 38px rgba(0,0,0,.34); }
 .poster-card img { transition: transform .5s cubic-bezier(.22, 1, .36, 1), filter .35s ease; }
 .poster-card:hover img { transform: scale(1.045); filter: saturate(1.08); }
-.catalog-section-title { flex: 1; border-radius: 4px; background: #e6004d; padding: 5px 9px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .03em; }
-.catalog-more-link { min-width: 125px; border-radius: 4px; background: #5bb45d; padding: 5px 9px; color: #fff; text-align: center; font-size: 11px; font-weight: 800; transition: background .2s ease; }
-.catalog-more-link:hover { background: #489a4c; }
+.section-heading { position: relative; flex: 1; border-left: 3px solid #f1c75b; padding-left: 9px; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .12em; line-height: 1.1; }
+.section-more { display: inline-flex; min-height: 28px; align-items: center; gap: 2px; border-radius: 999px; border: 1px solid rgba(255,255,255,.11); padding: 0 9px 0 11px; color: rgba(255,255,255,.58); font-size: 9px; font-weight: 800; letter-spacing: .08em; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+.section-more:hover { border-color: rgba(241,199,91,.6); background: rgba(241,199,91,.08); color: #f1c75b; }
 .hero-vignette { background: linear-gradient(90deg, #10151d 0%, rgba(16,21,29,.87) 26%, rgba(16,21,29,.25) 62%, rgba(16,21,29,.6) 100%), linear-gradient(0deg, #10151d 0%, transparent 42%); }
 @media (max-width: 767px) {
   .hero-vignette { background: linear-gradient(0deg, #10151d 4%, rgba(16,21,29,.74) 42%, rgba(16,21,29,.18) 100%); }

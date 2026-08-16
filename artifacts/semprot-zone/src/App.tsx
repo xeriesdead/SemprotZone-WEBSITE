@@ -76,34 +76,36 @@ function MediaImage({ src, alt, className, ...props }: { src?: string; alt: stri
 function Logo({ compact = false, catalog = false }: { compact?: boolean; catalog?: boolean }) {
   return (
     <Link href="/" className="group flex items-center gap-2.5" data-testid="link-logo">
-      <span className={cx('relative flex h-8 w-8 items-center justify-center rounded-[9px] shadow-[0_5px_18px_rgba(245,188,92,.18)]', catalog ? 'bg-white text-[#e6004d]' : 'bg-amber-300 text-[#11161d]')}>
-        <Clapperboard className="h-[17px] w-[17px]" strokeWidth={2.3} />
-        <span className={cx('absolute -right-1 -top-1 h-2 w-2 rounded-full', catalog ? 'bg-[#5bb45d]' : 'bg-[#e47b67]')} />
+      <span className={cx('relative flex h-9 w-9 items-center justify-center rounded-[10px] text-[12px] font-black tracking-[-.08em] shadow-[0_5px_18px_rgba(245,188,92,.18)]', catalog ? 'bg-[#f1c75b] text-[#15171d]' : 'bg-amber-300 text-[#11161d]')}>
+        SZ
+        <span className={cx('absolute -right-1 -top-1 h-2 w-2 rounded-full', catalog ? 'bg-[#ef5a6f]' : 'bg-[#e47b67]')} />
       </span>
-      {!compact && <span className={cx('font-mono-ui text-[13px] font-bold tracking-[.18em] transition-colors', catalog ? 'text-white group-hover:text-white/80' : 'text-stone-100 group-hover:text-amber-200')}>SEMPR<span className={catalog ? 'text-white/70' : 'text-amber-300'}>OT</span> ZONE</span>}
+      {!compact && <span className={cx('text-[15px] font-extrabold tracking-[-.03em] transition-colors', catalog ? 'text-white group-hover:text-[#f1c75b]' : 'text-stone-100 group-hover:text-amber-200')}>Semprot<span className={catalog ? 'text-[#f1c75b]' : 'text-amber-300'}>Zone</span></span>}
     </Link>
   );
 }
 
 function Header({ onSearch, catalog = false, searchValue, onSearchChange }: { onSearch?: () => void; catalog?: boolean; searchValue?: string; onSearchChange?: (value: string) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   return (
-    <header className={cx('z-40', catalog ? 'relative bg-[#f30812] text-white' : 'absolute inset-x-0 top-0')}>
-      <div className={cx('mx-auto flex px-5 md:px-10 lg:px-14', catalog ? 'h-[70px] max-w-[1080px] items-center justify-between' : 'h-[76px] max-w-[1440px] items-center justify-between')}>
+    <header className={cx('z-40', catalog ? 'sticky top-0 border-b border-white/[.08] bg-[#11141b]/95 text-white backdrop-blur-xl' : 'absolute inset-x-0 top-0')}>
+      <div className={cx('mx-auto flex px-4 sm:px-6 md:px-10 lg:px-14', catalog ? 'h-[66px] max-w-[1240px] items-center justify-between' : 'h-[76px] max-w-[1440px] items-center justify-between')}>
         <Logo catalog={catalog} />
-        {catalog && onSearchChange && <div className="mx-8 hidden max-w-[610px] flex-1 md:block"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/75" /><input value={searchValue || ''} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search movie" className="h-9 w-full rounded border border-white/80 bg-transparent pl-9 pr-3 text-sm text-white outline-none placeholder:text-white/75 focus:bg-white/10" aria-label="Search movie" /></div></div>}
+        {catalog && onSearchChange && <div className="mx-8 hidden max-w-[520px] flex-1 md:block"><div className="relative"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" /><input value={searchValue || ''} onChange={(event) => onSearchChange(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSearch?.(); }} placeholder="Cari film atau series..." className="h-10 w-full rounded-full border border-white/10 bg-white/[.06] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#f1c75b]/60 focus:bg-white/[.09]" aria-label="Search movie" data-testid="input-header-search" /></div></div>}
         <nav className={cx('items-center text-[13px] font-semibold tracking-wide', catalog ? 'hidden' : 'hidden gap-8 text-stone-300 md:flex')}>
           <Link href="/" className="transition-colors hover:text-amber-200" data-testid="link-home">Home</Link>
           <Link href="/browse" className="transition-colors hover:text-amber-200" data-testid="link-browse">Browse</Link>
           <a href="#about" className="transition-colors hover:text-amber-200" data-testid="link-about">About</a>
         </nav>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onSearch} className={cx('flex h-9 w-9 items-center justify-center transition-colors', catalog ? 'text-white md:hidden' : 'rounded-full text-stone-300 hover:bg-white/10 hover:text-amber-200')} aria-label="Search" data-testid="button-header-search"><Search className="h-[18px] w-[18px]" /></button>
+          <button type="button" onClick={() => catalog ? setMobileSearchOpen((open) => !open) : onSearch?.()} className={cx('flex h-9 w-9 items-center justify-center transition-colors', catalog ? 'text-white md:hidden' : 'rounded-full text-stone-300 hover:bg-white/10 hover:text-amber-200')} aria-label="Search" data-testid="button-header-search"><Search className="h-[18px] w-[18px]" /></button>
           {!catalog && <button type="button" className="hidden h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3.5 text-xs font-semibold text-stone-200 transition-colors hover:border-amber-300/40 hover:text-amber-200 sm:flex" data-testid="button-profile"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e47b67] text-[10px] font-bold text-[#1b171b]">SZ</span> Guest</button>}
           <button type="button" onClick={() => setMenuOpen((open) => !open)} className="flex h-9 w-9 items-center justify-center text-stone-200 md:hidden" aria-label="Open menu" data-testid="button-mobile-menu">{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button>
         </div>
       </div>
-      {catalog && <nav className="hidden h-[38px] items-center gap-7 bg-[#e6004d] px-5 text-xs font-semibold md:flex md:px-10 lg:px-14"><Link href="/" className="hover:text-white/75" data-testid="link-catalog-home">Home</Link><Link href="/browse" className="text-white/75 hover:text-white" data-testid="link-catalog-browse">Catalog</Link><a href="#latest" className="hover:text-white/75">Latest Movie</a><a href="#trending" className="hover:text-white/75">Trending</a><a href="#series" className="hover:text-white/75">Series</a></nav>}
+      {catalog && mobileSearchOpen && onSearchChange && <div className="border-t border-white/[.08] px-4 py-3 md:hidden"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" /><input autoFocus value={searchValue || ''} onChange={(event) => onSearchChange(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSearch?.(); }} placeholder="Cari judul film atau series..." className="h-11 w-full rounded-full border border-white/10 bg-white/[.07] pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#f1c75b]/60" aria-label="Search movie on mobile" data-testid="input-mobile-search" /></div></div>}
+      {catalog && <nav className="hidden h-[38px] items-center gap-7 border-t border-white/[.06] bg-[#171a22] px-5 text-xs font-semibold text-white/65 md:flex md:px-10 lg:px-14"><Link href="/" className="text-white hover:text-[#f1c75b]" data-testid="link-catalog-home">Home</Link><Link href="/browse" className="hover:text-white" data-testid="link-catalog-browse">Catalog</Link><a href="#latest" className="hover:text-white">Latest</a><a href="#trending" className="hover:text-white">Trending</a><a href="#series" className="hover:text-white">Series</a></nav>}
       {menuOpen && <div className={cx('border-y px-6 py-4 md:hidden', catalog ? 'border-white/20 bg-[#e6004d]' : 'border-white/10 bg-[#11161e]/95 backdrop-blur-lg')}><div className="flex flex-col gap-4 text-sm font-semibold text-white"><Link href="/" data-testid="link-mobile-home">Home</Link><Link href="/browse" data-testid="link-mobile-browse">Catalog</Link><a href="#latest" data-testid="link-mobile-latest">Latest Movie</a><a href="#trending" data-testid="link-mobile-trending">Trending</a></div></div>}
     </header>
   );
@@ -142,14 +144,17 @@ function PosterCard({ content, saved, onToggle }: { content: Content; saved: boo
   );
 }
 
-function Rail({ title, items, saved, onToggle }: { title: string; items: Content[]; saved: (id: string) => boolean; onToggle: (content: Content) => void }) {
+function SectionHeader({ title, href = '/browse' }: { title: string; href?: string }) {
+  return <div className="mb-3 flex items-center justify-between gap-3"><h2 className="section-heading">{title}</h2><Link href={href} className="section-more" data-testid={`link-more-${title.toLowerCase().replace(/\s/g, '-')}`}>LIHAT SEMUA <ChevronRight className="h-3.5 w-3.5" /></Link></div>;
+}
+
+function ContentGrid({ items, saved, onToggle, className = '' }: { items: Content[]; saved: (id: string) => boolean; onToggle: (content: Content) => void; className?: string }) {
+  return <div className={cx('grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5 sm:gap-x-3 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8', className)}>{items.map((item) => <ContentCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>;
+}
+
+function Rail({ title, items, saved, onToggle, id }: { title: string; items: Content[]; saved: (id: string) => boolean; onToggle: (content: Content) => void; id?: string }) {
   if (!items?.length) return null;
-  return (
-    <section className="mb-6" data-testid={`section-rail-${title.toLowerCase().replace(/\s/g, '-')}`}>
-      <div className="mb-2 flex items-center justify-between gap-2"><h2 className="catalog-section-title">{title.toUpperCase()}</h2><Link href="/browse" className="catalog-more-link">MORE MOVIE</Link></div>
-      <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">{items.map((item) => <CatalogPosterCard key={item.id} content={item} saved={saved(item.id)} onToggle={() => onToggle(item)} />)}</div>
-    </section>
-  );
+  return <section id={id} className="mb-8" data-testid={`section-rail-${title.toLowerCase().replace(/\s/g, '-')}`}><SectionHeader title={title} /><ContentGrid items={items} saved={saved} onToggle={onToggle} /></section>;
 }
 
 function SkeletonRail() {
@@ -166,21 +171,29 @@ function EmptyState({ title, message }: { title: string; message: string }) {
 
 function Home() {
   const { data, isLoading, isError, refetch } = useGetHome();
+  const { data: catalogData } = useListCatalog({}, { query: { queryKey: getListCatalogQueryKey({}) } });
   const { toggle, has } = useWatchlist();
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
   const feed = data as HomeFeed | undefined;
+  const catalog = (catalogData || []) as Content[];
+  const latestMovies = catalog.filter((item) => item.type === 'movie').slice(0, 6);
+  const trending = feed?.rails?.find((rail) => rail.id === 'popular')?.items || feed?.rails?.[0]?.items || [];
+  const series = catalog.filter((item) => item.type === 'series').slice(0, 6);
+  const latest = catalog.slice(0, 6);
   return (
-    <div className="catalog-page min-h-[100dvh] bg-white text-[#242424]">
+    <div className="catalog-page min-h-[100dvh] bg-[#0d1016] text-stone-100">
       <Header catalog searchValue={search} onSearchChange={setSearch} onSearch={() => setLocation(`/browse${search ? `?query=${encodeURIComponent(search)}` : ''}`)} />
-      {isLoading ? <main className="mx-auto max-w-[1080px] px-3 pb-16 pt-5 md:px-5"><div className="mb-4 h-4 w-full animate-shimmer rounded" /><SkeletonRail /><SkeletonRail /></main> : isError ? <main className="pt-20"><ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /></main> : !feed ? <main className="pt-20"><EmptyState title="No screenings tonight." message="There is nothing in the public catalog yet. Check back after the next programming drop." /></main> : <>
-        <main className="mx-auto max-w-[1080px] px-3 pb-16 pt-5 md:px-5">
-          <div className="mb-4 border-b border-[#dedede] pb-3 text-xs font-semibold text-[#222]"><span>Bookmark</span> <span className="text-[#e6004d]">https://semprot.zone</span> Untuk Update Alamat Tanpa VPN Terbaru.</div>
-          <div className="mb-4 flex items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.08em] text-[#e6004d]">Semprot Zone</p><h1 className="mt-1 text-2xl font-bold leading-none text-[#272727]">Nonton film pilihan terbaru</h1></div><Link href="/browse" className="hidden text-xs font-bold text-[#e6004d] sm:block" data-testid="link-explore-all">LIHAT SEMUA</Link></div>
-          {feed.rails?.map((rail) => <Rail key={rail.id} title={rail.title} items={rail.items} saved={has} onToggle={(content) => toggle(content.id)} />)}
-          {!feed.rails?.length && <EmptyState title="The program is between reels." message="Browse the catalog to see everything currently available." />}
+      {isLoading ? <main className="mx-auto max-w-[1240px] px-3 pb-16 pt-5 md:px-6"><div className="mb-6 h-4 w-full animate-shimmer rounded" /><SkeletonRail /><SkeletonRail /></main> : isError ? <main className="pt-20"><ErrorState message="The catalog is temporarily out of focus. Try reloading the program." retry={() => refetch()} /></main> : !feed ? <main className="pt-20"><EmptyState title="No screenings tonight." message="There is nothing in the public catalog yet. Check back after the next programming drop." /></main> : <>
+         <main className="mx-auto max-w-[1240px] px-3 pb-16 pt-5 sm:px-5 md:px-8">
+           <div className="mb-7 flex items-center justify-between gap-4 border-b border-white/[.08] pb-4"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#f1c75b]">SemprotZone catalog</p><h1 className="mt-2 text-[22px] font-extrabold tracking-[-.04em] text-white sm:text-3xl">Cerita pilihan, setiap hari.</h1></div><Link href="/browse" className="hidden rounded-full border border-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.1em] text-white/60 transition hover:border-[#f1c75b]/60 hover:text-[#f1c75b] sm:inline-flex" data-testid="link-explore-all">Jelajahi katalog</Link></div>
+           <Rail id="latest" title="FILM TERBARU" items={latestMovies} saved={has} onToggle={(content) => toggle(content.id)} />
+           <Rail id="trending" title="TRENDING" items={trending} saved={has} onToggle={(content) => toggle(content.id)} />
+           {series.length > 0 && <Rail id="series" title="SERIES TERBARU" items={series} saved={has} onToggle={(content) => toggle(content.id)} />}
+           <Rail title="LATEST" items={latest} saved={has} onToggle={(content) => toggle(content.id)} />
+           {!latestMovies.length && !trending.length && !series.length && !latest.length && <EmptyState title="The program is between reels." message="Browse the catalog to see everything currently available." />}
         </main>
-        <footer id="about" className="border-t border-[#e5e5e5] px-5 py-8"><div className="mx-auto flex max-w-[1080px] flex-col justify-between gap-3 text-[11px] text-[#888] sm:flex-row"><span className="font-bold text-[#e6004d]">SEMProt ZONE</span><p>Free to watch. Supported by a few well-placed pauses.</p><span>© Semprot Zone</span></div></footer>
+         <footer id="about" className="border-t border-white/[.08] px-5 py-8"><div className="mx-auto flex max-w-[1240px] flex-col justify-between gap-3 text-[11px] text-stone-500 sm:flex-row"><span className="font-bold text-[#f1c75b]">SemprotZone</span><p>Free to watch. Stories worth staying up for.</p><span>© SemprotZone</span></div></footer>
       </>}
     </div>
   );
@@ -221,15 +234,15 @@ function VideoCard({ content, saved, onToggle }: { content: Content; saved: bool
   );
 }
 
-function CatalogPosterCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
+function ContentCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
   return (
     <article className="catalog-poster group relative min-w-0" data-testid={`card-catalog-${content.id}`}>
       <Link href={`/title/${content.id}`} className="block" data-testid={`link-catalog-${content.id}`}>
-        <div className="relative aspect-[2/3] overflow-hidden rounded-[5px] bg-[#d7d7d7] shadow-sm">
+        <div className="relative aspect-[2/3] overflow-hidden rounded-[6px] bg-[#252932] shadow-[0_10px_24px_rgba(0,0,0,.25)]">
           <MediaImage src={content.posterUrl || content.backdropUrl} alt={content.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-          <div className="absolute inset-x-2 bottom-2 text-center text-[11px] font-medium leading-4 text-white drop-shadow-md">{content.title}</div>
-          <div className="absolute left-1.5 top-1.5 rounded bg-[#343434]/85 px-1.5 py-0.5 text-[10px] font-semibold text-white"><Star className="mr-0.5 inline h-3 w-3 fill-[#ffd13b] text-[#ffd13b]" />{content.rating.toFixed(1)}</div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090b10] via-[#090b10]/15 to-transparent" />
+          <div className="absolute inset-x-2 bottom-2 text-[11px] font-semibold leading-[1.15] text-white drop-shadow-md"><span className="line-clamp-2">{content.title}</span><span className="mt-1 block text-[9px] font-medium text-white/65">{content.year}</span></div>
+          {content.rating > 0 && <div className="absolute left-1.5 top-1.5 rounded bg-[#10131a]/85 px-1.5 py-1 text-[9px] font-semibold text-white backdrop-blur-sm"><Star className="mr-0.5 inline h-2.5 w-2.5 fill-[#f1c75b] text-[#f1c75b]" />{content.rating.toFixed(1)}</div>}
         </div>
       </Link>
       <button type="button" onClick={onToggle} className={cx('absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-[#e6004d]', saved && 'text-[#ffd13b]')} aria-label={saved ? `Remove ${content.title} from watchlist` : `Add ${content.title} to watchlist`} data-testid={`button-catalog-watchlist-${content.id}`}>
@@ -237,6 +250,10 @@ function CatalogPosterCard({ content, saved, onToggle }: { content: Content; sav
       </button>
     </article>
   );
+}
+
+function CatalogPosterCard({ content, saved, onToggle }: { content: Content; saved: boolean; onToggle: () => void }) {
+  return <ContentCard content={content} saved={saved} onToggle={onToggle} />;
 }
 
 function ModernBrowse() {
